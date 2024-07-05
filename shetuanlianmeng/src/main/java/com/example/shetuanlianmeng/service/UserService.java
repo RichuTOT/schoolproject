@@ -11,26 +11,16 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public User registerUser(User user) {
-        return userRepository.save(user);
+    public boolean authenticate(String username, String password) {
+        User user = userRepository.findByUsername(username);
+        return user != null && user.getPassword().equals(password);
     }
 
-    public User findUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public boolean register(User user) {
+        if (userRepository.findByUsername(user.getUsername()) != null) {
+            return false;
+        }
+        userRepository.save(user);
+        return true;
     }
-
-    public User updateUser(Long id, User userDetails) {
-        User user = userRepository.findById(id).orElseThrow();
-        user.setUsername(userDetails.getUsername());
-        user.setPassword(userDetails.getPassword());
-        user.setRole(userDetails.getRole());
-        return userRepository.save(user);
-    }
-
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id);
-    }
-    
-
-    // 其他用户相关操作
 }
