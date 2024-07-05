@@ -1,23 +1,42 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Login from '../components/Login.vue';
 import Register from '../components/Register.vue';
-import Dashboard from '../views/Dashboard.vue'; // 引入新的页面组件
+import Dashboard from '../views/Dashboard.vue';
+import PageOne from '../views/PageOne.vue';
+import PageTwo from '../views/PageTwo.vue';
+import PageThree from '../views/PageThree.vue';
+import Content from '../views/Content.vue'; // 新添加的内容组件
 
 const routes = [
   {
     path: '/',
-    name: 'Login',
-    component: Login
+    redirect: '/login'
   },
-  {
-    path: '/register',
-    name: 'Register',
-    component: Register
-  },
-  {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: Dashboard // 新的页面路由配置
+  {path: '/login',name: 'Login',component: Login},
+  {path: '/register',name: 'Register',component: Register},
+  {path: '/dashboard',name: 'Dashboard',component: Dashboard,
+    children: [
+      {
+        path: 'page-one', 
+        name: 'PageOne',
+        component: PageOne //个人中心
+      },
+      {
+        path: 'page-two',
+        name: 'PageTwo',
+        component: PageTwo //搜索社团
+      },
+      {
+        path: 'page-three',
+        name: 'PageThree',
+        component: PageThree
+      },
+      {
+        path: 'content', // 新添加的内容路径
+        name: 'Content',
+        component: Content
+      }
+    ]
   }
 ];
 
