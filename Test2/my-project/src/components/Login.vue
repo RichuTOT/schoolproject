@@ -15,6 +15,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'Login',
   data() {
@@ -37,9 +39,14 @@ export default {
     handleLogin() {
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
-          // 模拟登录成功
-          alert('登录成功');
-          this.$router.push({ name: 'Dashboard' }); // 跳转到新的页面
+          axios.post('/api/users/login', this.loginForm)
+            .then(response => {
+              alert(response.data);
+              this.$router.push({ name: 'Dashboard' }); // 跳转到新的页面
+            })
+            .catch(error => {
+              alert(`错误: ${error.response ? error.response.data : error.message}`);
+            });
         } else {
           console.log('error submit!!');
           return false;
