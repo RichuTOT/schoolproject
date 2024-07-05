@@ -1,7 +1,7 @@
 <template>
   <div id="app">
 
-    <header class="header">
+    <header class="header2">
       社团联盟登录平台
     </header>
 
@@ -30,7 +30,7 @@ body {
 }
 
 .header {
-  width: 400%;
+  /**width: 400%;*/
   text-align: left;
   padding: 10px 20px;
   font-size: 24px;
@@ -38,6 +38,19 @@ body {
   color: #333;
   background-color: #ffffff; 
 }
+
+
+.header2 {
+  width: 500%;
+  text-align: left;
+  padding: 10px 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  background-color: #ffffff; 
+}
+
+
 
 nav {
   display: flex;
@@ -48,11 +61,11 @@ nav {
 nav a {
   margin: 0 15px;
   text-decoration: none;
-  color: #ffffff;
+  color: #000000; /* 将链接颜色改为黑色 */
 }
 
 nav a:hover {
-  color: #ffffff;
+  color: #ffffff; /* 鼠标悬停时的颜色也改为黑色 */
 }
 
 #app {
