@@ -13,13 +13,22 @@ public class ClubService {
     @Autowired
     private ClubRepository clubRepository;
 
-    public Club createClub(Club club) {
-        return clubRepository.save(club);
-    }
-
     public List<Club> getAllClubs() {
         return clubRepository.findAll();
     }
 
-    // 其他社团相关操作
+    public List<Club> searchClubs(String name) {
+        return clubRepository.findByNameContaining(name);
+    }
+
+    public List<Club> getClubsByCategory(String category) {
+        return clubRepository.findByCategory(category);
+    }
+
+    public Club saveClub(Club club) {
+        if (clubRepository.existsByName(club.getName())) {
+            throw new IllegalArgumentException("社团名称已存在");
+        }
+        return clubRepository.save(club);
+    }
 }
