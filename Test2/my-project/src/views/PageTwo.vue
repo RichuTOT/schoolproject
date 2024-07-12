@@ -70,7 +70,6 @@
 
 <script>
 import axios from 'axios';
-import { store } from '../store';
 import { ElMessage } from 'element-plus';
 
 export default {
@@ -82,6 +81,9 @@ export default {
       currentPage: 1,
       pageSize: 10, // 每页显示的条数
       selectedCategory: 'all',
+      userId: localStorage.getItem('userId'), // assuming you store userId in localStorage
+      appliedClubs: [], // 存储已申请的社团
+      favoriteClubs: [], // 存储收藏的社团
     };
   },
   computed: {
@@ -115,13 +117,64 @@ export default {
         console.error('Error fetching clubs:', error);
       }
     },
+    async fetchAppliedClubs() {
+      try {
+        const response = await axios.get(`/api/applications/user/${this.userId}`);
+        this.appliedClubs = response.data.map(application => application.clubName);
+      } catch (error) {
+        console.error('Error fetching applied clubs:', error);
+      }
+    },
+    async fetchFavoriteClubs() {
+      try {
+        const response = await axios.get(`/api/favorites/user/${this.userId}`);
+        this.favoriteClubs = response.data.map(favorite => favorite.name);
+      } catch (error) {
+        console.error('Error fetching favorite clubs:', error);
+      }
+    },
     handleSearch() {
       this.currentPage = 1; // 重置分页到第一页
     },
-    applyClub(club) {
-      if (!store.applicationRequests.some(req => req.name === club.name)) {
-        store.addApplicationRequest(club);
+    async applyClub(club) {
+      try {
+        await axios.post('/api/applications', {
+          name: club.name,
+          category: club.category,
+          userId: this.userId,
+          status: '审批中',
+          date: new Date().toISOString()
+        });
+        this.appliedClubs.push(club.name); // 更新已申请的社团列表
         ElMessage.success('申请已提交');
+      } catch (error) {
+        console.error('Error applying for club:', error);
+        ElMessage.error('申请提交失败');
+      }
+    },
+    async toggleFavorite(club) {
+      try {
+        if (this.isFavorite(club)) {
+          await axios.delete(`/api/favorites/${club.id}`, {
+            data: {
+              userId: this.userId,
+            },
+          });
+          this.favoriteClubs = this.favoriteClubs.filter(name => name !== club.name); // 更新收藏的社团列表
+          ElMessage.success('取消收藏');
+        } else {
+          await axios.post('/api/favorites', {
+            name: club.name,
+            category: club.category,
+            userId: this.userId,
+            date: new Date().toISOString(),
+          });
+          this.favoriteClubs.push(club.name); // 更新收藏的社团列表
+          ElMessage.success('已收藏');
+        }
+      } catch (error) {
+        console.error('Error toggling favorite:', error);
+        ElMessage.error('收藏失败');
       }
     },
     handlePageChange(page) {
@@ -132,23 +185,16 @@ export default {
       this.currentPage = 1; // 重置分页到第一页
     },
     isFavorite(club) {
-      return store.isFavorite(club);
-    },
-    toggleFavorite(club) {
-      if (store.isFavorite(club)) {
-        store.removeFavorite(club);
-        ElMessage.success('取消收藏');
-      } else {
-        store.addFavorite(club);
-        ElMessage.success('已收藏');
-      }
+      return this.favoriteClubs.includes(club.name);
     },
     isApplied(club) {
-      return store.applicationRequests.some(req => req.name === club.name);
-    },
+      return this.appliedClubs.includes(club.name);
+    }
   },
-  mounted() {
-    this.fetchClubs();
+  async mounted() {
+    await this.fetchClubs();
+    await this.fetchAppliedClubs();
+    await this.fetchFavoriteClubs();
   },
 };
 </script>

@@ -1,3 +1,4 @@
+// src/main/java/com/example/shetuanlianmeng/config/WebConfig.java
 package com.example.shetuanlianmeng.config;
 
 import org.springframework.context.annotation.Bean;

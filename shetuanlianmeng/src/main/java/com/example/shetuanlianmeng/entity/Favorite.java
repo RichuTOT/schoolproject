@@ -8,8 +8,8 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "applications")
-public class Application {
+@Table(name = "favorites")
+public class Favorite {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +19,6 @@ public class Application {
     private String category;
     private Long userId;
     private LocalDateTime date;
-    private String status;
     
     // Getters and Setters
 
@@ -61,13 +60,5 @@ public class Application {
 
     public void setDate(LocalDateTime date) {
         this.date = date;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 }

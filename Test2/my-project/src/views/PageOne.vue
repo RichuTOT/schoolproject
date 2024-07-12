@@ -47,40 +47,42 @@
 </template>
 
 <script>
-import { computed } from 'vue';
-import { store } from '../store';
+import { computed, ref, onMounted } from 'vue';
+import axios from 'axios';
 import { ElMessage } from 'element-plus';
 
 export default {
   name: 'PageOne',
   setup() {
-    const toggleFavorite = (club) => {
-      if (store.isFavorite(club)) {
-        store.removeFavorite(club);
-        ElMessage({
-          message: '取消收藏',
-          type: 'info',
-        });
-      } else {
-        store.addFavorite(club);
-        ElMessage({
-          message: '已收藏',
-          type: 'success',
-        });
+    const userId = localStorage.getItem('userId');
+    const applicationRequests = ref([]);
+    const favoriteClubs = ref([]);
+    const sortedApplicationRequests = computed(() => {
+      return applicationRequests.value.sort((a, b) => new Date(b.date) - new Date(a.date));
+    });
+    const sortedFavoriteClubs = computed(() => {
+      return favoriteClubs.value.sort((a, b) => new Date(b.date) - new Date(a.date));
+    });
+
+    const fetchApplications = async () => {
+      try {
+        const response = await axios.get(`/api/applications/user/${userId}`);
+        applicationRequests.value = response.data;
+      } catch (error) {
+        console.error('Error fetching application requests:', error);
+        ElMessage.error('获取社团申请数据失败');
       }
     };
 
-    const isFavorite = (club) => {
-      return store.isFavorite(club);
+    const fetchFavorites = async () => {
+      try {
+        const response = await axios.get(`/api/favorites/user/${userId}`);
+        favoriteClubs.value = response.data;
+      } catch (error) {
+        console.error('Error fetching favorites:', error);
+        ElMessage.error('获取收藏社团数据失败');
+      }
     };
-
-    const sortedFavoriteClubs = computed(() => {
-      return store.favoriteClubs.sort((a, b) => new Date(b.date) - new Date(a.date));
-    });
-
-    const sortedApplicationRequests = computed(() => {
-      return store.applicationRequests.sort((a, b) => new Date(b.date) - new Date(a.date));
-    });
 
     const getStatusColor = (status) => {
       switch (status) {
@@ -95,12 +97,47 @@ export default {
       }
     };
 
+    const toggleFavorite = async (club) => {
+      try {
+        if (isFavorite(club)) {
+          await axios.delete(`/api/favorites/${club.id}`, {
+            data: {
+              userId: userId,
+            },
+          });
+          favoriteClubs.value = favoriteClubs.value.filter(fav => fav.id !== club.id);
+          ElMessage.success('取消收藏');
+        } else {
+          const response = await axios.post('/api/favorites', {
+            name: club.name,
+            category: club.category,
+            userId: userId,
+            date: new Date().toISOString(),
+          });
+          favoriteClubs.value.push(response.data);
+          ElMessage.success('已收藏');
+        }
+      } catch (error) {
+        console.error('Error toggling favorite:', error);
+        ElMessage.error('收藏失败');
+      }
+    };
+
+    const isFavorite = (club) => {
+      return favoriteClubs.value.some(fav => fav.name === club.name);
+    };
+
+    onMounted(async () => {
+      await fetchApplications();
+      await fetchFavorites();
+    });
+
     return {
+      sortedApplicationRequests,
+      sortedFavoriteClubs,
+      getStatusColor,
       toggleFavorite,
       isFavorite,
-      sortedFavoriteClubs,
-      sortedApplicationRequests,
-      getStatusColor,
     };
   },
 };

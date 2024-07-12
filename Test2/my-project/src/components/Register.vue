@@ -27,11 +27,7 @@
       </div>
     </div>
   </div>
-  <nav>
-      <!--导航栏-->
-      <router-link to="/">登录</router-link>
-      <router-link to="/register">注册</router-link>
-    </nav>
+
     
 </template>
 

@@ -5,35 +5,20 @@ import com.example.shetuanlianmeng.repository.ActivityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class ActivityService {
-
     @Autowired
     private ActivityRepository activityRepository;
 
     public Activity createActivity(Activity activity) {
+        activity.setPublishTime(LocalDateTime.now()); // 设置当前时间
         return activityRepository.save(activity);
-    }
-
-    public Activity updateActivity(Long id, Activity activityDetails) {
-        Activity activity = activityRepository.findById(id).orElseThrow();
-        activity.setName(activityDetails.getName());
-        activity.setDescription(activityDetails.getDescription());
-        activity.setDate(activityDetails.getDate());
-        return activityRepository.save(activity);
-    }
-
-    public void deleteActivity(Long id) {
-        activityRepository.deleteById(id);
     }
 
     public List<Activity> getAllActivities() {
         return activityRepository.findAll();
-    }
-
-    public Activity getActivityById(Long id) {
-        return activityRepository.findById(id).orElseThrow();
     }
 }

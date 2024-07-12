@@ -6,6 +6,9 @@ import PageOne from '../views/PageOne.vue';
 import PageTwo from '../views/PageTwo.vue';
 import PageThree from '../views/PageThree.vue';
 import Content from '../views/Content.vue'; // 新添加的内容组件
+import PageFour from '../views/PageFour.vue';
+import PageFive from '../views/PageFive.vue';
+
 
 const routes = [
   {
@@ -31,6 +34,17 @@ const routes = [
         name: 'PageThree',
         component: PageThree
       },
+      {
+        path: 'page-four',
+        name: 'PageFour',
+        component: PageFour //社团聊天
+      },
+      {
+        path: 'page-five',
+        name: 'PageFive',
+        component: PageFive //创建社团
+      },
+
       {
         path: 'content', // 新添加的内容路径
         name: 'Content',
