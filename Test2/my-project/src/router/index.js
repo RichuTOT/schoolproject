@@ -8,6 +8,11 @@ import PageThree from '../views/PageThree.vue';
 import Content from '../views/Content.vue'; // 新添加的内容组件
 import PageFour from '../views/PageFour.vue';
 import PageFive from '../views/PageFive.vue';
+import AdminDashboard from '../views/AdminDashboard.vue';
+import ClubApproval from '../views/ClubApproval.vue';
+import ActivityApproval from '../views/ActivityApproval.vue';
+import Statistics from '../views/Statistics.vue';
+import ClubManagement from '../views/ClubManagement.vue';
 
 
 const routes = [
@@ -50,6 +55,15 @@ const routes = [
         name: 'Content',
         component: Content
       }
+    ]
+  },
+  {
+    path: '/admin-dashboard', name: 'AdminDashboard', component: AdminDashboard,
+    children: [
+      { path: 'club-approval', name: 'ClubApproval', component: ClubApproval },
+      { path: 'activity-approval', name: 'ActivityApproval', component: ActivityApproval },
+      { path: 'statistics', name: 'Statistics', component: Statistics },
+      { path: 'club-management', name: 'ClubManagement', component: ClubManagement }
     ]
   }
 ];

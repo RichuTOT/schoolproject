@@ -15,9 +15,9 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
-        boolean isAuthenticated = userService.authenticate(user.getUsername(), user.getPassword());
-        if (isAuthenticated) {
-            return ResponseEntity.ok("登录成功");
+        User authenticatedUser = userService.authenticate(user.getUsername(), user.getPassword());
+        if (authenticatedUser != null) {
+            return ResponseEntity.ok(authenticatedUser);
         } else {
             return ResponseEntity.status(401).body("用户名或密码错误");
         }

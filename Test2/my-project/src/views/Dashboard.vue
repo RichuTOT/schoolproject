@@ -88,6 +88,9 @@ export default {
       console.log('退出登录');
       this.$router.push({ name: 'Login' });
     }
+  },
+  created() {
+    this.$router.push({ path: '/dashboard/content' });
   }
 };
 </script>
