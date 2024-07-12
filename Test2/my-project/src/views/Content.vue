@@ -24,18 +24,23 @@
 </template>
 
 <script>
-import axios from '../axios';
+import axios from 'axios';
 import { ref, onMounted, computed } from 'vue';
 import { format, isValid } from 'date-fns';
 
 export default {
-  name: 'Content',
+  name: 'Home',
   setup() {
     const activities = ref([]);
+    const carouselItems = ref([
+      { src: 'image1.jpg' },
+      { src: 'image2.jpg' },
+      { src: 'image3.jpg' }
+    ]);
 
     const fetchActivities = async () => {
       try {
-        const response = await axios.get('/api/activities');
+        const response = await axios.get('http://localhost:8088/api/activities');
         activities.value = response.data;
       } catch (error) {
         console.error('Error fetching activities:', error);
@@ -58,7 +63,8 @@ export default {
     return {
       activities,
       sortedActivities,
-      formatDate
+      formatDate,
+      carouselItems
     };
   }
 };

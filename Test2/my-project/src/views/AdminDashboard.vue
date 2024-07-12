@@ -3,7 +3,7 @@
       <el-container>
         <el-header class="header">
           <div class="header-content">
-            <span>登录平台</span>
+            <span>后端管理平台</span>
             <el-button class="logout-button" type="primary" @click="logout">退出登录</el-button>
           </div>
         </el-header>
@@ -55,16 +55,16 @@
       handleMenuSelect(key, keyPath) {
         switch (key) {
           case '1':
-            this.$router.push({ name: 'Infor' });
+            this.$router.push({ name: 'Statistics' });
           break;
           case '2':
-            this.$router.push({ name: 'Audits' });
+            this.$router.push({ name: 'ClubApproval' });
             break;
           case '3':
-            this.$router.push({ name: 'Managment' });
+            this.$router.push({ name: 'ClubManagement' });
             break;
           case '4':
-            this.$router.push({ name: 'Eventa' });
+            this.$router.push({ name: 'ActivityApproval' });
             break;
           
           default:         
@@ -76,7 +76,10 @@
         console.log('退出登录');
         this.$router.push({ name: 'Login' });
       }
-    }
+    },
+    created() {
+    this.$router.push({ path: '/admin-dashboard/statistics' });
+  }
   };
   </script>
   

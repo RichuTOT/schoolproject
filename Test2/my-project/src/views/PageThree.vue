@@ -7,24 +7,20 @@
           <el-form-item label="活动名称">
             <el-input v-model="activityForm.name" placeholder="请输入"></el-input>
           </el-form-item>
-
           <el-form-item label="详细介绍">
             <el-input type="textarea" v-model="activityForm.description" placeholder="请输入"></el-input>
           </el-form-item>
-
           <el-form-item label="活动地点">
             <el-input v-model="activityForm.location" placeholder="请输入"></el-input>
           </el-form-item>
-
           <el-form-item label="社团名称">
             <el-input v-model="activityForm.clubName" placeholder="请输入"></el-input>
           </el-form-item>
         </el-col>
-
         <el-col :span="12">
           <el-form-item label="添加图片">
             <el-upload
-              action="http://localhost:8088/api/upload"
+              action="http://localhost:8088/api/activities/upload"
               list-type="picture-card"
               :on-preview="handlePictureCardPreview"
               :on-remove="handleRemove"
@@ -35,13 +31,10 @@
           </el-form-item>
         </el-col>
       </el-row>
-
       <el-form-item>
-        <el-button type="primary" @click="saveActivity">保存</el-button>
         <el-button type="success" @click="publishActivity">发布</el-button>
       </el-form-item>
     </el-form>
-
     <el-dialog :visible.sync="dialogVisible">
       <img width="100%" :src="dialogImageUrl" alt="">
     </el-dialog>
@@ -49,7 +42,7 @@
 </template>
 
 <script>
-import axios from '../axios';
+import axios from 'axios';
 import { ref } from 'vue';
 
 export default {
@@ -76,6 +69,7 @@ export default {
     };
 
     const handleUploadSuccess = (response, file, fileList) => {
+      console.log('Upload success:', response);
       activityForm.value.images.push(response.url);
     };
 
@@ -83,17 +77,13 @@ export default {
       console.error('Upload error:', err);
     };
 
-    const saveActivity = () => {
-      console.log('Activity saved', activityForm.value);
-    };
-
     const publishActivity = async () => {
+      const activityData = {
+        ...activityForm.value,
+        publishTime: new Date().toISOString()
+      };
       try {
-        const activityData = {
-          ...activityForm.value,
-          publishTime: new Date().toISOString()  // 添加当前时间
-        };
-        const response = await axios.post('/api/activities', activityData);
+        const response = await axios.post('http://localhost:8088/api/activities', activityData);
         console.log('Activity published', response.data);
         activityForm.value = {
           name: '',
@@ -115,7 +105,6 @@ export default {
       handleRemove,
       handleUploadSuccess,
       handleUploadError,
-      saveActivity,
       publishActivity
     };
   }

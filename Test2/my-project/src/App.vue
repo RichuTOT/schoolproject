@@ -2,7 +2,7 @@
   <div id="app">
 
     <header class="header2">
-      社团联盟登录平台
+      社团联盟
     </header>
 
     <router-view></router-view>

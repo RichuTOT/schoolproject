@@ -15,7 +15,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-
 import java.util.Arrays;
 
 @Configuration
@@ -53,7 +52,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/users/register", "/api/users/**", "/api/clubs/**", "/api/activities/**", "/api/applications/**", "/api/favorites/**").permitAll()
+                .requestMatchers("/api/users/register", "/api/users/**", "/api/clubs/**", "/api/activities/**", "/api/applications/**", "/api/favorites/**", "/api/uploads/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )

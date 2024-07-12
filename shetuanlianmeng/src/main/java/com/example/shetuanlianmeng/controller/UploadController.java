@@ -1,9 +1,9 @@
-// src/main/java/com/example/shetuanlianmeng/controller/UploadController.java
 package com.example.shetuanlianmeng.controller;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/upload")
+@RequestMapping("/api/uploads")
 public class UploadController {
 
     private static final String UPLOAD_DIR = "uploads/";
@@ -27,11 +27,15 @@ public class UploadController {
             }
 
             // Save the file
-            Path filePath = uploadPath.resolve(file.getOriginalFilename());
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            Path filePath = uploadPath.resolve(fileName);
             Files.copy(file.getInputStream(), filePath);
 
             // Return the file URL
-            String fileUrl = "/uploads/" + file.getOriginalFilename();
+            String fileUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/uploads/")
+                    .path(fileName)
+                    .toUriString();
             Map<String, String> response = new HashMap<>();
             response.put("url", fileUrl);
             return ResponseEntity.ok(response);
