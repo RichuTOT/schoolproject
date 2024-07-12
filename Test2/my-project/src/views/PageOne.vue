@@ -5,14 +5,20 @@
         <img src="https://via.placeholder.com/100" alt="用户头像" />
       </div>
       <div class="account-info">
-        <p>账号：xxxxxxxxxxx</p>
+        <p>账号：{{ username }}</p>
+        <p>ID：{{ userId }}</p>
+        <p>角色：{{ role }}</p>
         <el-button type="primary">编辑资料</el-button>
       </div>
     </div>
     <div class="club-list">
       <h3>社团审批流程</h3>
       <el-table :data="sortedApplicationRequests" style="width: 100%">
-        <el-table-column prop="date" label="申请时间" width="180"></el-table-column>
+        <el-table-column prop="date" label="申请时间" width="180">
+          <template v-slot="scope">
+            <span>{{ formatDate(scope.row.date) }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="name" label="社团名称" width="180"></el-table-column>
         <el-table-column prop="category" label="类别" width="180"></el-table-column>
         <el-table-column prop="status" label="审批状态" width="180">
@@ -27,16 +33,20 @@
 
       <h3>收藏的社团</h3>
       <el-table :data="sortedFavoriteClubs" style="width: 100%">
-        <el-table-column prop="date" label="收藏时间" width="180"></el-table-column>
+        <el-table-column prop="date" label="收藏时间" width="180">
+          <template v-slot="scope">
+            <span>{{ formatDate(scope.row.date) }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="name" label="社团名称" width="180"></el-table-column>
         <el-table-column prop="category" label="类别" width="180"></el-table-column>
-        <el-table-column label="收藏" width="150">
+        <el-table-column label="操作" width="150">
           <template v-slot="scope">
             <el-button
-              :type="isFavorite(scope.row) ? 'danger' : 'success'"
-              @click="toggleFavorite(scope.row)"
+              type="danger"
+              @click="removeFavorite(scope.row)"
             >
-              {{ isFavorite(scope.row) ? '取消收藏' : '收藏' }}
+              取消收藏
             </el-button>
           </template>
         </el-table-column>
@@ -50,11 +60,14 @@
 import { computed, ref, onMounted } from 'vue';
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
+import { format } from 'date-fns';
 
 export default {
   name: 'PageOne',
   setup() {
     const userId = localStorage.getItem('userId');
+    const username = localStorage.getItem('username');
+    const role = localStorage.getItem('role');
     const applicationRequests = ref([]);
     const favoriteClubs = ref([]);
     const sortedApplicationRequests = computed(() => {
@@ -97,34 +110,22 @@ export default {
       }
     };
 
-    const toggleFavorite = async (club) => {
+    const removeFavorite = async (club) => {
       try {
-        if (isFavorite(club)) {
-          await axios.delete(`/api/favorites/${club.id}`, {
-            data: {
-              userId: userId,
-            },
-          });
-          favoriteClubs.value = favoriteClubs.value.filter(fav => fav.id !== club.id);
-          ElMessage.success('取消收藏');
-        } else {
-          const response = await axios.post('/api/favorites', {
-            name: club.name,
-            category: club.category,
-            userId: userId,
-            date: new Date().toISOString(),
-          });
-          favoriteClubs.value.push(response.data);
-          ElMessage.success('已收藏');
-        }
+        await axios.delete(`/api/favorites`, {
+          data: { userId: userId, name: club.name },
+          withCredentials: true,
+        });
+        favoriteClubs.value = favoriteClubs.value.filter(fav => fav.name !== club.name);
+        ElMessage.success('取消收藏成功');
       } catch (error) {
-        console.error('Error toggling favorite:', error);
-        ElMessage.error('收藏失败');
+        console.error('Error removing favorite:', error);
+        ElMessage.error('取消收藏失败');
       }
     };
 
-    const isFavorite = (club) => {
-      return favoriteClubs.value.some(fav => fav.name === club.name);
+    const formatDate = (dateString) => {
+      return format(new Date(dateString), 'yyyy-MM-dd');
     };
 
     onMounted(async () => {
@@ -133,11 +134,14 @@ export default {
     });
 
     return {
+      username,
+      userId,
+      role,
       sortedApplicationRequests,
       sortedFavoriteClubs,
       getStatusColor,
-      toggleFavorite,
-      isFavorite,
+      removeFavorite,
+      formatDate,
     };
   },
 };

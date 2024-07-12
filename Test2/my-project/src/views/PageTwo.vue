@@ -26,7 +26,11 @@
         <!-- 主内容 -->
         <el-table :data="paginatedClubs" class="club-table" style="margin-top: 20px;">
           <el-table-column prop="name" label="社团名称" width="180"></el-table-column>
-          <el-table-column prop="date" label="发布时间" width="180"></el-table-column>
+          <el-table-column prop="date" label="发布时间" width="180">
+            <template v-slot="scope">
+              <span>{{ formatDate(scope.row.date) }}</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="author" label="发布人" width="180"></el-table-column>
           <el-table-column prop="category" label="类别" width="180"></el-table-column>
           <el-table-column label="收藏" width="150">
@@ -71,6 +75,7 @@
 <script>
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
+import { format } from 'date-fns';
 
 export default {
   name: 'PageTwo',
@@ -111,7 +116,7 @@ export default {
   methods: {
     async fetchClubs() {
       try {
-        const response = await axios.get('/api/clubs');
+        const response = await axios.get('/api/clubs', { withCredentials: true });
         this.clubs = response.data;
       } catch (error) {
         console.error('Error fetching clubs:', error);
@@ -119,15 +124,15 @@ export default {
     },
     async fetchAppliedClubs() {
       try {
-        const response = await axios.get(`/api/applications/user/${this.userId}`);
-        this.appliedClubs = response.data.map(application => application.clubName);
+        const response = await axios.get(`/api/applications/user/${this.userId}`, { withCredentials: true });
+        this.appliedClubs = response.data.map(application => application.name);
       } catch (error) {
         console.error('Error fetching applied clubs:', error);
       }
     },
     async fetchFavoriteClubs() {
       try {
-        const response = await axios.get(`/api/favorites/user/${this.userId}`);
+        const response = await axios.get(`/api/favorites/user/${this.userId}`, { withCredentials: true });
         this.favoriteClubs = response.data.map(favorite => favorite.name);
       } catch (error) {
         console.error('Error fetching favorite clubs:', error);
@@ -144,7 +149,7 @@ export default {
           userId: this.userId,
           status: '审批中',
           date: new Date().toISOString()
-        });
+        }, { withCredentials: true });
         this.appliedClubs.push(club.name); // 更新已申请的社团列表
         ElMessage.success('申请已提交');
       } catch (error) {
@@ -155,26 +160,25 @@ export default {
     async toggleFavorite(club) {
       try {
         if (this.isFavorite(club)) {
-          await axios.delete(`/api/favorites/${club.id}`, {
-            data: {
-              userId: this.userId,
-            },
+          const response = await axios.delete(`/api/favorites`, {
+            data: { userId: this.userId, name: club.name },
+            withCredentials: true,
           });
           this.favoriteClubs = this.favoriteClubs.filter(name => name !== club.name); // 更新收藏的社团列表
-          ElMessage.success('取消收藏');
+          ElMessage.success('取消收藏成功');
         } else {
           await axios.post('/api/favorites', {
             name: club.name,
             category: club.category,
             userId: this.userId,
             date: new Date().toISOString(),
-          });
+          }, { withCredentials: true });
           this.favoriteClubs.push(club.name); // 更新收藏的社团列表
           ElMessage.success('已收藏');
         }
       } catch (error) {
         console.error('Error toggling favorite:', error);
-        ElMessage.error('收藏失败');
+        ElMessage.error('操作失败');
       }
     },
     handlePageChange(page) {
@@ -189,6 +193,9 @@ export default {
     },
     isApplied(club) {
       return this.appliedClubs.includes(club.name);
+    },
+    formatDate(dateString) {
+      return format(new Date(dateString), 'yyyy-MM-dd');
     }
   },
   async mounted() {
@@ -198,6 +205,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .el-container {

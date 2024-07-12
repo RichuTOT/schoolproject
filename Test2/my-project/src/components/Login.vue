@@ -55,6 +55,7 @@ export default {
             .then(response => {
               const user = response.data;
               localStorage.setItem('userId', user.id);
+              localStorage.setItem('username', user.username);
               localStorage.setItem('role', user.role);
               if (user.role === 'admin') {
                 this.$router.push({ name: 'AdminDashboard' });

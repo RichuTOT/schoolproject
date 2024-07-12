@@ -19,11 +19,11 @@ public class FavoriteController {
         return favoriteRepository.save(favorite);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteFavorite(@PathVariable Long id, @RequestBody Long userId) {
-        Favorite favorite = favoriteRepository.findById(id).orElse(null);
-        if (favorite != null && favorite.getUserId().equals(userId)) {
-            favoriteRepository.delete(favorite);
+    @DeleteMapping
+    public void deleteFavorite(@RequestBody Favorite favorite) {
+        Favorite foundFavorite = favoriteRepository.findByUserIdAndName(favorite.getUserId(), favorite.getName());
+        if (foundFavorite != null) {
+            favoriteRepository.delete(foundFavorite);
         }
     }
 
