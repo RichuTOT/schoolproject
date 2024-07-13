@@ -2,12 +2,15 @@ package com.example.shetuanlianmeng.service;
 
 import com.example.shetuanlianmeng.entity.ClubApplication;
 import com.example.shetuanlianmeng.repository.ClubApplicationRepository;
-import com.example.shetuanlianmeng.entity.User;
-import com.example.shetuanlianmeng.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List; // 添加此行
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 @Service
 public class ClubApplicationService {
@@ -15,28 +18,22 @@ public class ClubApplicationService {
     @Autowired
     private ClubApplicationRepository clubApplicationRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final Path root = Paths.get("uploads");
 
-    public ClubApplication submitApplication(ClubApplication application) {
-        application.setStatus("PENDING");
-        return clubApplicationRepository.save(application);
-    }
-
-    public ClubApplication reviewApplication(Long id, String status) {
-        ClubApplication application = clubApplicationRepository.findById(id).orElseThrow();
-        application.setStatus(status);
-
-        if ("APPROVED".equals(status)) {
-            User user = application.getUser();
-            user.setRole("CLUB_MANAGER");
-            userRepository.save(user);
-        }
-
-        return clubApplicationRepository.save(application);
-    }
-
-    public List<ClubApplication> getAllApplications() {
+    public List<ClubApplication> getAllClubApplications() {
         return clubApplicationRepository.findAll();
+    }
+
+    public ClubApplication createClubApplication(ClubApplication clubApplication) {
+        return clubApplicationRepository.save(clubApplication);
+    }
+
+    public String uploadImage(MultipartFile file) throws IOException {
+        if (!Files.exists(root)) {
+            Files.createDirectories(root);
+        }
+        Path path = root.resolve(file.getOriginalFilename());
+        Files.copy(file.getInputStream(), path);
+        return path.toString();
     }
 }
