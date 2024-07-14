@@ -24,11 +24,17 @@ const activityCount = ref(0);
 
 onMounted(async () => {
   try {
-    const response = await fetch('http://localhost:8088/api/statistics'); // 修改为实际的后端接口地址
+    const response = await fetch('http://localhost:8088/api/statistics', {
+      credentials: 'include', // 确保请求带上凭证
+    });
     const data = await response.json();
-    clubCount.value = data.clubCount;
-    memberCount.value = data.memberCount;
-    activityCount.value = data.activityCount;
+    if (response.ok) {
+      clubCount.value = data.clubCount;
+      memberCount.value = data.memberCount;
+      activityCount.value = data.activityCount;
+    } else {
+      console.error('获取数据失败', data);
+    }
   } catch (error) {
     console.error('获取数据失败', error);
   }

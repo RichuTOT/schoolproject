@@ -53,11 +53,10 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/users/register", "/api/users/**", "/api/clubs/**", "/api/activities/**", "/api/applications/**", "/api/favorites/**", "/api/uploads/**", "/api/club-applications/**", "/api/user-info").permitAll()
+                .requestMatchers("/api/users/register", "/api/users/**", "/api/clubs/**", "/api/activities/**", "/api/applications/**", "/api/favorites/**", "/api/uploads/**", "/api/club-applications/**", "/api/user-info", "/api/statistics").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )

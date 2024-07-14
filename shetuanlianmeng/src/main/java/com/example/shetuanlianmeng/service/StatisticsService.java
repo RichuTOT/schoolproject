@@ -22,10 +22,10 @@ public class StatisticsService {
     private ActivityRepository activityRepository;
 
     public Map<String, Long> getStatistics() {
-        Map<String, Long> statistics = new HashMap<>();
-        statistics.put("clubCount", clubRepository.count());
-        statistics.put("memberCount", userRepository.count()); // Assuming this counts both users and leaders
-        statistics.put("activityCount", activityRepository.count());
-        return statistics;
+        Map<String, Long> stats = new HashMap<>();
+        stats.put("clubCount", clubRepository.count());
+        stats.put("memberCount", userRepository.countByRole("member") + userRepository.countByRole("clubleader"));
+        stats.put("activityCount", activityRepository.count());
+        return stats;
     }
 }
