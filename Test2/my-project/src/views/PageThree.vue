@@ -38,12 +38,18 @@
     <el-dialog :visible.sync="dialogVisible">
       <img width="100%" :src="dialogImageUrl" alt="">
     </el-dialog>
+    <h2>审核中的活动</h2>
+    <el-table :data="pendingActivities" style="width: 100%">
+      <el-table-column prop="name" label="活动名称" width="180"></el-table-column>
+      <el-table-column prop="status" label="状态" width="180"></el-table-column>
+      <el-table-column prop="date" label="申请时间" width="180"></el-table-column>
+    </el-table>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
 export default {
   name: 'PageThree',
@@ -58,6 +64,7 @@ export default {
 
     const dialogImageUrl = ref('');
     const dialogVisible = ref(false);
+    const pendingActivities = ref([]);
 
     const handlePictureCardPreview = (file) => {
       dialogImageUrl.value = file.url;
@@ -77,14 +84,24 @@ export default {
       console.error('Upload error:', err);
     };
 
+    const fetchPendingActivities = async () => {
+      try {
+        const response = await axios.get('http://localhost:8088/api/activities/pending', { withCredentials: true });
+        pendingActivities.value = response.data;
+      } catch (error) {
+        console.error('Error fetching pending activities:', error);
+      }
+    };
+
     const publishActivity = async () => {
       const activityData = {
         ...activityForm.value,
-        publishTime: new Date().toISOString()
+        publishTime: new Date().toISOString(),
+        status: 'pending'
       };
       try {
         const response = await axios.post('http://localhost:8088/api/activities', activityData);
-        console.log('Activity published', response.data);
+        console.log('Activity submitted for approval', response.data);
         activityForm.value = {
           name: '',
           description: '',
@@ -92,15 +109,21 @@ export default {
           clubName: '',
           images: []
         };
+        fetchPendingActivities(); // Refresh pending activities list
       } catch (error) {
         console.error('Error publishing activity:', error);
       }
     };
 
+    onMounted(() => {
+      fetchPendingActivities();
+    });
+
     return {
       activityForm,
       dialogImageUrl,
       dialogVisible,
+      pendingActivities,
       handlePictureCardPreview,
       handleRemove,
       handleUploadSuccess,

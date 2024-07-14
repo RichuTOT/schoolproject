@@ -32,24 +32,29 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails admin = User.withUsername("admin")
-            .password(passwordEncoder().encode("adminpassword"))
-            .roles("ADMIN")
-            .build();
+public UserDetailsService userDetailsService() {
+    UserDetails admin = User.withUsername("admin")
+        .password(passwordEncoder().encode("adminpassword"))
+        .roles("ADMIN")
+        .build();
 
-        UserDetails clubMember = User.withUsername("member")
-            .password(passwordEncoder().encode("memberpassword"))
-            .roles("CLUB_MEMBER")
-            .build();
+    UserDetails clubMember = User.withUsername("member")
+        .password(passwordEncoder().encode("memberpassword"))
+        .roles("CLUB_MEMBER")
+        .build();
 
-        UserDetails clubManager = User.withUsername("manager")
-            .password(passwordEncoder().encode("managerpassword"))
-            .roles("CLUB_MANAGER")
-            .build();
+    UserDetails clubManager = User.withUsername("manager")
+        .password(passwordEncoder().encode("managerpassword"))
+        .roles("CLUB_MANAGER")
+        .build();
 
-        return new InMemoryUserDetailsManager(admin, clubMember, clubManager);
-    }
+    UserDetails clubLeader = User.withUsername("leader")
+        .password(passwordEncoder().encode("leaderpassword"))
+        .roles("CLUB_LEADER")
+        .build();
+
+    return new InMemoryUserDetailsManager(admin, clubMember, clubManager, clubLeader);
+}
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -59,6 +64,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/api/users/register", "/api/users/**", "/api/clubs/**", "/api/activities/**", "/api/applications/**", "/api/favorites/**", "/api/uploads/**", "/api/club-applications/**", "/api/user-info", "/api/statistics").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/dashboard/page-three", "/dashboard/members").hasRole("CLUB_LEADER")
                 .anyRequest().authenticated()
             )
             .formLogin(formLogin -> formLogin
@@ -72,17 +78,16 @@ public class SecurityConfig {
     }
 
     @Bean
-public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
-    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-    configuration.setExposedHeaders(Arrays.asList("X-Total-Count"));
-    configuration.setAllowCredentials(true);
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        configuration.setExposedHeaders(Arrays.asList("X-Total-Count"));
+        configuration.setAllowCredentials(true);
 
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", configuration);
-    return source;
-}
-
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }

@@ -27,21 +27,21 @@
               <i class="el-icon-menu"></i>
               <span slot="title">搜索社团</span>
             </el-menu-item>
-            <el-menu-item index="5">
+            <el-menu-item index="4">
               <i class="el-icon-message"></i>
               <span slot="title">社团交流</span>
             </el-menu-item>
-            <el-menu-item index="6">
-              <i class="el-icon-message"></i>
+            <el-menu-item index="5">
+              <i class="el-icon-setting"></i>
               <span slot="title">创建社团</span>            
             </el-menu-item>       
-            <el-menu-item index="4">
+            <el-menu-item index="6">
               <i class="el-icon-setting"></i>
               <span slot="title">活动发布</span>
             </el-menu-item> 
-            <el-menu-item index="5">
+            <el-menu-item index="7">
               <i class="el-icon-setting"></i>
-              <span slot="title">社团管理</span>
+              <span slot="title">成员管理</span>
             </el-menu-item> 
           </el-menu>          
         </el-aside>
@@ -55,15 +55,30 @@
 </template>
 
 <script>
+import { ElMessage } from 'element-plus';
+
 export default {
   name: 'Dashboard',
   data() {
     return {
-      activeMenu: '1'
+      activeMenu: '1',
+      userRole: localStorage.getItem('role') || 'member' // assuming you store userRole in localStorage
     };
   },
   methods: {
     handleMenuSelect(key, keyPath) {
+      console.log('Selected menu item:', key);
+      console.log('Current user role:', this.userRole);
+
+      if ((key === '6' || key === '7') && this.userRole !== 'clubleader') {
+        console.log('User is not clubleader, showing warning message.');
+        ElMessage({
+          message: '只有成立了社团才能使用该功能',
+          type: 'warning',
+        });
+        return;
+      }
+
       switch (key) {
         case '1':
           this.$router.push({ name: 'Content' });
@@ -75,18 +90,18 @@ export default {
           this.$router.push({ name: 'PageTwo' });
           break;
         case '4':
-          this.$router.push({ name: 'PageThree' });
-          break;
-        case '5':
           this.$router.push({ name: 'PageFour' });
           break;
-        case '6':
+        case '5':
           this.$router.push({ name: 'PageFive' });
           break;
-          case '7':
-          this.$router.push({ name: 'Member' });
+        case '6':
+          this.$router.push({ name: 'PageThree' });
           break;
-        default:         
+        case '7':
+          this.$router.push({ name: 'Members' });
+          break;
+        default:
           break;
       }
     },
@@ -97,6 +112,7 @@ export default {
     }
   },
   created() {
+    console.log('Dashboard created, user role:', this.userRole);
     this.$router.push({ path: '/dashboard/content' });
   }
 };
