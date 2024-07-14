@@ -19,8 +19,10 @@ public class ClubApplicationService {
 
     @Autowired
     private ClubApplicationRepository clubApplicationRepository;
+
     @Autowired
     private ClubRepository clubRepository;
+
     @Autowired
     private UserService userService;
 
@@ -58,9 +60,15 @@ public class ClubApplicationService {
         application.setStatus("approved");
         clubApplicationRepository.save(application);
 
-        Club club = new Club(application.getClubName(), application.getApplyTime(), application.getPublisher(), application.getCategory(), application.getPublisher());
+        // 保存到Club数据库表中
+        Club club = new Club();
+        club.setName(application.getClubName());
+        club.setAuthor(application.getPublisher());
+        club.setDate(application.getApplyTime());
+        club.setCategory(application.getCategory());
         clubRepository.save(club);
 
+        // 更新用户角色
         userService.updateUserRole(Long.valueOf(application.getUserId()), "clubleader");
     }
 

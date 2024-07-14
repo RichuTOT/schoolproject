@@ -25,21 +25,16 @@
       <el-main>
         <!-- 主内容 -->
         <el-table :data="paginatedClubs" class="club-table" style="margin-top: 20px;">
-          <el-table-column prop="index" label="序号" width="100">
-            <template #default="scope">
-              <span>{{ scope.$index + 1 }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="name" label="社团名称" width="200"></el-table-column>
+          <el-table-column prop="name" label="社团名称" width="180"></el-table-column>
           <el-table-column prop="date" label="成立时间" width="180">
             <template v-slot="scope">
               <span>{{ formatDate(scope.row.date) }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="president" label="社长" width="120"></el-table-column>
+          <el-table-column prop="author" label="社长" width="180"></el-table-column>
           <el-table-column label="操作" width="150">
             <template v-slot="scope">
-              <el-button type="danger" size="mini" @click="deleteClub(scope.row.id)">删除</el-button>
+              <el-button type="danger" @click="confirmDelete(scope.row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -62,7 +57,7 @@
 
 <script>
 import axios from 'axios';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { format } from 'date-fns';
 
 export default {
@@ -84,7 +79,8 @@ export default {
         const matchesSearchQuery = (
           searchRegex.test(club.name) ||
           searchRegex.test(club.date) ||
-          searchRegex.test(club.president) // 确保使用正确字段
+          searchRegex.test(club.author) ||
+          searchRegex.test(club.category)
         );
         const matchesCategory = (
           this.selectedCategory === 'all' || club.category === this.selectedCategory
@@ -104,21 +100,11 @@ export default {
         const response = await axios.get('http://localhost:8088/api/clubs', { withCredentials: true });
         this.clubs = response.data;
       } catch (error) {
-        console.error('获取数据失败', error);
+        console.error('Error fetching clubs:', error);
       }
     },
     handleSearch() {
       this.currentPage = 1; // 重置分页到第一页
-    },
-    async deleteClub(id) {
-      try {
-        await axios.delete(`http://localhost:8088/api/clubs/${id}`, { withCredentials: true });
-        this.fetchClubs();
-        ElMessage.success('删除成功');
-      } catch (error) {
-        console.error('删除失败', error);
-        ElMessage.error('删除失败');
-      }
     },
     handlePageChange(page) {
       this.currentPage = page;
@@ -129,7 +115,39 @@ export default {
     },
     formatDate(dateString) {
       return format(new Date(dateString), 'yyyy-MM-dd');
-    }
+    },
+    confirmDelete(club) {
+      ElMessageBox.confirm('你确定要删除该社团吗？', '确认', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(() => {
+          this.deleteClub(club.id);
+        })
+        .catch(() => {
+          ElMessage({
+            type: 'info',
+            message: '已取消删除',
+          });
+        });
+    },
+    async deleteClub(clubId) {
+  try {
+    await axios.delete(`http://localhost:8088/api/clubs/${clubId}`, { withCredentials: true });
+    this.clubs = this.clubs.filter(club => club.id !== clubId);
+    ElMessage({
+      type: 'success',
+      message: '社团已删除',
+    });
+  } catch (error) {
+    console.error('Error deleting club:', error);
+    ElMessage({
+      type: 'error',
+      message: `删除失败: ${error.response ? error.response.data : error.message}`,
+    });
+  }
+},
   },
   async mounted() {
     await this.fetchClubs();

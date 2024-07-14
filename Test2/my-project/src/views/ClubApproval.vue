@@ -82,6 +82,18 @@ const approveClub = async (row) => {
         type: 'success',
         message: '社团已同意',
       });
+      await fetch(`http://localhost:8088/api/clubs`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: row.clubName,
+          author: row.publisher,
+          date: row.applyTime,
+          category: row.category,
+        }),
+      });
       await updateUserRole(row.userId, 'clubleader');
     } else {
       throw new Error('批准失败');
