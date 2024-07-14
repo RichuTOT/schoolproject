@@ -16,17 +16,19 @@ public class Club {
     private String date;
     private String author;
     private String category;
+    private String president; // 添加 president 字段
     private int currentMembers = 0; // 设置默认值
 
     // 无参构造函数
     public Club() {}
 
     // 全参构造函数
-    public Club(String name, String date, String author, String category) {
+    public Club(String name, String date, String author, String category, String president) {
         this.name = name;
         this.date = date;
         this.author = author;
         this.category = category;
+        this.president = president;
         this.currentMembers = 0; // 初始化字段
     }
 }

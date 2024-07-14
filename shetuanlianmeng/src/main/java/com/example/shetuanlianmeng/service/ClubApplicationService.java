@@ -1,11 +1,9 @@
 package com.example.shetuanlianmeng.service;
 
 import com.example.shetuanlianmeng.entity.Club;
-import com.example.shetuanlianmeng.entity.AdminClub;
 import com.example.shetuanlianmeng.entity.ClubApplication;
 import com.example.shetuanlianmeng.repository.ClubApplicationRepository;
 import com.example.shetuanlianmeng.repository.ClubRepository;
-import com.example.shetuanlianmeng.repository.AdminClubRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,8 +21,6 @@ public class ClubApplicationService {
     private ClubApplicationRepository clubApplicationRepository;
     @Autowired
     private ClubRepository clubRepository;
-    @Autowired
-    private AdminClubRepository adminClubRepository;
     @Autowired
     private UserService userService;
 
@@ -62,13 +58,8 @@ public class ClubApplicationService {
         application.setStatus("approved");
         clubApplicationRepository.save(application);
 
-        Club club = new Club(application.getClubName(), application.getApplyTime(), application.getPublisher(), application.getCategory());
+        Club club = new Club(application.getClubName(), application.getApplyTime(), application.getPublisher(), application.getCategory(), application.getPublisher());
         clubRepository.save(club);
-
-        AdminClub adminClub = new AdminClub();
-        adminClub.setAdminId(Long.valueOf(application.getUserId()));
-        adminClub.setClubId(club.getId());
-        adminClubRepository.save(adminClub);
 
         userService.updateUserRole(Long.valueOf(application.getUserId()), "clubleader");
     }
