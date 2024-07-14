@@ -42,7 +42,7 @@
     <el-table :data="pendingActivities" style="width: 100%">
       <el-table-column prop="name" label="活动名称" width="180"></el-table-column>
       <el-table-column prop="status" label="状态" width="180"></el-table-column>
-      <el-table-column prop="date" label="申请时间" width="180"></el-table-column>
+      <el-table-column prop="publishTime" label="申请时间" width="180"></el-table-column>
     </el-table>
   </div>
 </template>
@@ -86,7 +86,7 @@ export default {
 
     const fetchPendingActivities = async () => {
       try {
-        const response = await axios.get('http://localhost:8088/api/activities/pending', { withCredentials: true });
+        const response = await axios.get('http://localhost:8088/api/activities/pending');
         pendingActivities.value = response.data;
       } catch (error) {
         console.error('Error fetching pending activities:', error);
@@ -109,15 +109,13 @@ export default {
           clubName: '',
           images: []
         };
-        fetchPendingActivities(); // Refresh pending activities list
+        await fetchPendingActivities(); // Refresh the list of pending activities
       } catch (error) {
         console.error('Error publishing activity:', error);
       }
     };
 
-    onMounted(() => {
-      fetchPendingActivities();
-    });
+    onMounted(fetchPendingActivities);
 
     return {
       activityForm,

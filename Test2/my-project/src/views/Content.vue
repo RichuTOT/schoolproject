@@ -40,7 +40,7 @@ export default {
 
     const fetchActivities = async () => {
       try {
-        const response = await axios.get('http://localhost:8088/api/activities');
+        const response = await axios.get('http://localhost:8088/api/activities/approved');
         activities.value = response.data;
       } catch (error) {
         console.error('Error fetching activities:', error);

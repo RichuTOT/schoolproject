@@ -64,6 +64,7 @@ public class ActivityController {
 
     @PostMapping
     public ResponseEntity<Activity> createActivity(@RequestBody Activity activity) {
+        activity.setStatus("pending"); // 设置活动状态为待审核
         Activity savedActivity = activityRepository.save(activity);
         for (String imageUrl : activity.getImages()) {
             Image image = new Image();
@@ -76,11 +77,47 @@ public class ActivityController {
 
     @GetMapping
     public ResponseEntity<List<Activity>> getAllActivities() {
-        List<Activity> activities = activityRepository.findAll();
+        List<Activity> activities = activityRepository.findByStatus("approved");
         for (Activity activity : activities) {
             List<Image> images = imageRepository.findByActivity(activity);
             activity.setImages(images.stream().map(Image::getImageUrl).collect(Collectors.toList()));
         }
         return ResponseEntity.ok(activities);
+    }
+
+    @GetMapping("/pending")
+    public ResponseEntity<List<Activity>> getPendingActivities() {
+        List<Activity> activities = activityRepository.findByStatus("pending");
+        for (Activity activity : activities) {
+            List<Image> images = imageRepository.findByActivity(activity);
+            activity.setImages(images.stream().map(Image::getImageUrl).collect(Collectors.toList()));
+        }
+        return ResponseEntity.ok(activities);
+    }
+
+    @GetMapping("/approved")
+    public ResponseEntity<List<Activity>> getApprovedActivities() {
+        List<Activity> activities = activityRepository.findByStatus("approved");
+        for (Activity activity : activities) {
+            List<Image> images = imageRepository.findByActivity(activity);
+            activity.setImages(images.stream().map(Image::getImageUrl).collect(Collectors.toList()));
+        }
+        return ResponseEntity.ok(activities);
+    }
+
+    @PostMapping("/approve/{id}")
+    public ResponseEntity<?> approveActivity(@PathVariable Long id) {
+        Activity activity = activityRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("活动未找到"));
+        activity.setStatus("approved");
+        activityRepository.save(activity);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reject/{id}")
+    public ResponseEntity<?> rejectActivity(@PathVariable Long id) {
+        Activity activity = activityRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("活动未找到"));
+        activity.setStatus("rejected");
+        activityRepository.save(activity);
+        return ResponseEntity.ok().build();
     }
 }

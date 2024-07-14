@@ -13,9 +13,10 @@ public class Activity {
     private String description;
     private String location;
     private String clubName;
-    private LocalDateTime publishTime; // 添加这个字段
+    private LocalDateTime publishTime;
     @ElementCollection
     private List<String> images;
+    private String status; // 添加这个字段
 
     // Getters and setters
     public Long getId() {
@@ -72,5 +73,13 @@ public class Activity {
 
     public void setImages(List<String> images) {
         this.images = images;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
