@@ -39,6 +39,10 @@
               <i class="el-icon-setting"></i>
               <span slot="title">活动发布</span>
             </el-menu-item> 
+            <el-menu-item index="5">
+              <i class="el-icon-setting"></i>
+              <span slot="title">社团管理</span>
+            </el-menu-item> 
           </el-menu>          
         </el-aside>
         
@@ -78,6 +82,9 @@ export default {
           break;
         case '6':
           this.$router.push({ name: 'PageFive' });
+          break;
+          case '7':
+          this.$router.push({ name: 'Member' });
           break;
         default:         
           break;

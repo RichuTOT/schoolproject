@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -31,5 +33,12 @@ public class UserController {
         } else {
             return ResponseEntity.status(400).body("注册失败");
         }
+    }
+
+    @PostMapping("/{userId}/role")
+    public ResponseEntity<?> updateUserRole(@PathVariable Long userId, @RequestBody Map<String, String> roleRequest) {
+        String role = roleRequest.get("role");
+        userService.updateUserRole(userId, role);
+        return ResponseEntity.ok("角色更新成功");
     }
 }

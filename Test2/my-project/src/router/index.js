@@ -13,6 +13,7 @@ import ClubApproval from '../views/ClubApproval.vue';
 import ActivityApproval from '../views/ActivityApproval.vue';
 import Statistics from '../views/Statistics.vue';
 import ClubManagement from '../views/ClubManagement.vue';
+import Member from '../views/Member.vue';
 
 
 const routes = [
@@ -54,6 +55,11 @@ const routes = [
         path: 'content', // 新添加的内容路径
         name: 'Content',
         component: Content
+      },
+      {
+        path: 'member', // 新添加的内容路径
+        name: 'Member',
+        component: Member
       }
     ]
   },

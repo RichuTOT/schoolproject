@@ -34,7 +34,7 @@ export default {
   },
   methods: {
     updateNavVisibility(route) {
-      const hiddenNavPages = ['Content', 'PageOne', 'PageTwo', 'PageThree', 'PageFour', 'PageFive'];
+      const hiddenNavPages = ['Content', 'PageOne', 'PageTwo', 'PageThree', 'PageFour', 'PageFive', 'Member'];
       this.showNav = !hiddenNavPages.includes(route.name);
     }
   }

@@ -46,6 +46,12 @@ public class UserService {
         return true;
     }
 
+    public void updateUserRole(Long userId, String role) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalStateException("User not found"));
+        user.setRole(role);
+        userRepository.save(user);
+    }
+
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
     }

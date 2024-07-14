@@ -16,7 +16,7 @@ public class ClubApplication {
     private String publisher;
     private String description;
     private String imageUrl;
-    private Long userId;
+    private String userId; // Changed to String
     private String applyTime;
     private String status;
 
@@ -69,11 +69,11 @@ public class ClubApplication {
         this.imageUrl = imageUrl;
     }
 
-    public Long getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
