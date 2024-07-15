@@ -92,6 +92,7 @@ const approveClub = async (row) => {
           author: row.publisher,
           date: row.applyTime,
           category: row.category,
+          userId: row.userId, // 添加 userId
         }),
       });
       await updateUserRole(row.userId, 'clubleader');

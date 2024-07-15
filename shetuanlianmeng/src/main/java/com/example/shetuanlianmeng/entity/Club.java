@@ -18,6 +18,7 @@ public class Club {
     private String category;
     private String president; // 添加 president 字段
     private int currentMembers = 0; // 设置默认值
+    private Long userId;
 
     // 无参构造函数
     public Club() {}

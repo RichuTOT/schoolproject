@@ -14,9 +14,11 @@ public class Activity {
     private String location;
     private String clubName;
     private LocalDateTime publishTime;
+    private String status;
+    private String author; // 添加 author 字段
+
     @ElementCollection
     private List<String> images;
-    private String status; // 添加这个字段
 
     // Getters and setters
     public Long getId() {
@@ -67,19 +69,27 @@ public class Activity {
         this.publishTime = publishTime;
     }
 
-    public List<String> getImages() {
-        return images;
-    }
-
-    public void setImages(List<String> images) {
-        this.images = images;
-    }
-
     public String getStatus() {
         return status;
     }
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public List<String> getImages() {
+        return images;
+    }
+
+    public void setImages(List<String> images) {
+        this.images = images;
     }
 }

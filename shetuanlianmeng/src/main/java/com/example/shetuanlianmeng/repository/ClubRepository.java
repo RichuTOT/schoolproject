@@ -9,4 +9,5 @@ public interface ClubRepository extends JpaRepository<Club, Long> {
     List<Club> findByNameContaining(String name);
     List<Club> findByCategory(String category);
     boolean existsByName(String name);
+    List<Club> findByUserId(Long userId); // 添加这个方法
 }

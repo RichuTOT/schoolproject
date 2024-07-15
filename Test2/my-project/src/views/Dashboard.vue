@@ -4,6 +4,7 @@
       <el-header class="header">
         <div class="header-content">
           <span>登录平台</span>
+          
           <el-button class="logout-button" type="primary" @click="logout">退出登录</el-button>
         </div>
       </el-header>
@@ -62,7 +63,8 @@ export default {
   data() {
     return {
       activeMenu: '1',
-      userRole: localStorage.getItem('role') || 'member' // assuming you store userRole in localStorage
+      userRole: localStorage.getItem('role') || 'member', // assuming you store userRole in localStorage
+      username: localStorage.getItem('username') || '' // assuming you store username in localStorage
     };
   },
   methods: {
@@ -113,6 +115,7 @@ export default {
   },
   created() {
     console.log('Dashboard created, user role:', this.userRole);
+    console.log('Dashboard created, username:', this.username);
     this.$router.push({ path: '/dashboard/content' });
   }
 };
@@ -142,6 +145,12 @@ export default {
 
 .logout-button {
   margin-left: auto;
+}
+
+.username {
+  margin-left: 20px;
+  font-size: 16px;
+  color: #fff;
 }
 
 .aside {
