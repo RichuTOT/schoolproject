@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ClubService {
@@ -35,6 +36,10 @@ public class ClubService {
             throw new IllegalArgumentException("社团名称已存在");
         }
         return clubRepository.save(club);
+    }
+
+    public Optional<Club> getClubByUserId(Long userId) {
+        return clubRepository.findByUserId(userId);
     }
 
     @Transactional

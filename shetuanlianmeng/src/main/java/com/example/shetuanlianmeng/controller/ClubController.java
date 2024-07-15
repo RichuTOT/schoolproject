@@ -8,10 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/clubs")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class ClubController {
 
     @Autowired
@@ -28,6 +30,17 @@ public class ClubController {
                 })
                 .collect(Collectors.toList());
     }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getClubByUserId(@PathVariable Long userId) {
+        Optional<Club> club = clubService.getClubByUserId(userId);
+        if (club.isPresent()) {
+            return ResponseEntity.ok(club.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Club not found");
+        }
+    }
+    
 
     @GetMapping("/search")
     public List<Club> searchClubs(@RequestParam String name) {

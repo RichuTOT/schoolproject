@@ -16,6 +16,7 @@ public class Activity {
     private LocalDateTime publishTime;
     private String status;
     private String author; // 添加 author 字段
+    private Long userId; // 添加 userId 字段
 
     @ElementCollection
     private List<String> images;
@@ -83,6 +84,14 @@ public class Activity {
 
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public List<String> getImages() {

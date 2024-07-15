@@ -1,50 +1,96 @@
 <template>
   <div class="activity-approval">
-    <el-card v-for="(activity, index) in activities" :key="index" class="activity-card">
-      <div slot="header" class="clearfix">
-        <span>活动申请</span>
-        <el-button 
-          type="success" 
-          icon="el-icon-check" 
-          size="mini" 
-          @click="approveActivity(activity.id, index)"
-          style="float: right; margin-left: 10px;">       
-        </el-button>
-        <el-button 
-          type="danger" 
-          icon="el-icon-close" 
-          size="mini" 
-          @click="rejectActivity(activity.id, index)"
-          style="float: right;">
-        </el-button>
-      </div>
-      <div>
-        <p><strong>活动状态:</strong> {{ activity.status }}</p>
-        <p><strong>申请社团:</strong> {{ activity.clubName }}</p>
-        <p><strong>活动名称:</strong> {{ activity.name }}</p>
-        <p><strong>活动时间:</strong> {{ formatDate(activity.publishTime) }}</p>
-        <p><strong>活动地点:</strong> {{ activity.location }}</p>
-        <p><strong>活动介绍:</strong> {{ activity.description }}</p>
-      </div>
-    </el-card>
+    <el-table :data="filteredActivities" style="width: 100%">
+      <el-table-column prop="clubName" label="申请社团" width="180"></el-table-column>
+      <el-table-column prop="name" label="活动名称" width="180"></el-table-column>
+      <el-table-column prop="publishTime" label="活动时间" width="180">
+        <template v-slot="scope">
+          <span>{{ formatDate(scope.row.publishTime) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="location" label="活动地点" width="180"></el-table-column>
+      <el-table-column prop="description" label="活动介绍"></el-table-column>
+      <el-table-column prop="status" label="活动状态" width="180">
+        <template v-slot="scope">
+          <span :style="{ color: getStatusColor(scope.row.status) }">
+            {{ scope.row.status }}
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="180">
+        <template v-slot="scope">
+          <el-button 
+            type="success" 
+            icon="el-icon-check" 
+            size="mini" 
+            @click="confirmApprove(scope.row.id, scope.$index)"
+            :disabled="scope.row.status !== 'pending'"
+            style="margin-right: 10px;">
+          </el-button>
+          <el-button 
+            type="danger" 
+            icon="el-icon-close" 
+            size="mini" 
+            @click="confirmReject(scope.row.id, scope.$index)"
+            :disabled="scope.row.status !== 'pending'">
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <div v-if="filteredActivities.length === 0" class="no-activities">暂无活动</div>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 export default {
   name: 'ActivityApproval',
   setup() {
     const activities = ref([]);
 
+    const confirmApprove = async (id, index) => {
+      ElMessageBox.confirm(
+        '确认通过该活动？',
+        '提示',
+        {
+          confirmButtonText: '通过',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }
+      ).then(() => {
+        approveActivity(id, index);
+      }).catch(() => {
+        ElMessage.info('已取消操作');
+      });
+    };
+
+    const confirmReject = async (id, index) => {
+      ElMessageBox.confirm(
+        '确认拒绝该活动？',
+        '提示',
+        {
+          confirmButtonText: '拒绝',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }
+      ).then(() => {
+        rejectActivity(id, index);
+      }).catch(() => {
+        ElMessage.info('已取消操作');
+      });
+    };
+
     const approveActivity = async (id, index) => {
       try {
         await axios.post(`http://localhost:8088/api/activities/approve/${id}`);
         activities.value[index].status = 'approved';
+        ElMessage.success('活动已通过审核');
       } catch (error) {
         console.error('Error approving activity:', error);
+        ElMessage.error('审核活动时发生错误');
       }
     };
 
@@ -52,17 +98,20 @@ export default {
       try {
         await axios.post(`http://localhost:8088/api/activities/reject/${id}`);
         activities.value[index].status = 'rejected';
+        ElMessage.success('活动已拒绝');
       } catch (error) {
         console.error('Error rejecting activity:', error);
+        ElMessage.error('拒绝活动时发生错误');
       }
     };
 
     const fetchActivities = async () => {
       try {
-        const response = await axios.get('http://localhost:8088/api/activities/pending');
+        const response = await axios.get('http://localhost:8088/api/activities');
         activities.value = response.data;
       } catch (error) {
         console.error('Error fetching activities:', error);
+        ElMessage.error('获取活动数据失败');
       }
     };
 
@@ -73,11 +122,40 @@ export default {
       return new Date(dateString).toLocaleDateString(undefined, options);
     };
 
+    const getStatusColor = (status) => {
+      switch (status) {
+        case 'approved':
+          return 'green';
+        case 'rejected':
+          return 'red';
+        case 'pending':
+        default:
+          return 'orange';
+      }
+    };
+
+    const filteredActivities = computed(() => {
+      return activities.value.filter(activity => 
+        ['pending', 'approved', 'rejected'].includes(activity.status)
+      ).sort((a, b) => {
+        if (a.status === 'pending' && b.status !== 'pending') {
+          return -1;
+        } else if (a.status !== 'pending' && b.status === 'pending') {
+          return 1;
+        }
+        return new Date(b.publishTime) - new Date(a.publishTime);
+      });
+    });
+
     return {
       activities,
+      confirmApprove,
+      confirmReject,
       approveActivity,
       rejectActivity,
-      formatDate
+      formatDate,
+      getStatusColor,
+      filteredActivities
     };
   }
 };
@@ -86,24 +164,15 @@ export default {
 <style scoped>
 .activity-approval {
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
-.activity-card {
-  width: 80%;
-  margin: 10px 0;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-}
-
-.el-card__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.no-activities {
+  text-align: center;
+  color: #999;
+  margin-top: 20px;
 }
 
 .el-button {
-  margin-left: 10px;
+  margin-right: 10px;
 }
 </style>
