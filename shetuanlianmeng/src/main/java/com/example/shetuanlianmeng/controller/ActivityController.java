@@ -77,7 +77,7 @@ public class ActivityController {
 
     @GetMapping
     public ResponseEntity<List<Activity>> getAllActivities() {
-        List<Activity> activities = activityRepository.findByStatus("approved");
+        List<Activity> activities = activityRepository.findAll();
         for (Activity activity : activities) {
             List<Image> images = imageRepository.findByActivity(activity);
             activity.setImages(images.stream().map(Image::getImageUrl).collect(Collectors.toList()));
