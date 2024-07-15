@@ -95,15 +95,16 @@ public class ActivityController {
         return ResponseEntity.ok(activities);
     }
 
-    @GetMapping("/approved")
-    public ResponseEntity<List<Activity>> getApprovedActivities() {
-        List<Activity> activities = activityRepository.findByStatus("approved");
-        for (Activity activity : activities) {
-            List<Image> images = imageRepository.findByActivity(activity);
-            activity.setImages(images.stream().map(Image::getImageUrl).collect(Collectors.toList()));
-        }
-        return ResponseEntity.ok(activities);
+    @GetMapping("/user/{userId}")
+public ResponseEntity<List<Activity>> getActivitiesByUserId(@PathVariable Long userId) {
+    List<Activity> activities = activityRepository.findByUserId(userId);
+    for (Activity activity : activities) {
+        List<Image> images = imageRepository.findByActivity(activity);
+        activity.setImages(images.stream().map(Image::getImageUrl).collect(Collectors.toList()));
     }
+    return ResponseEntity.ok(activities);
+}
+
 
     @PostMapping("/approve/{id}")
     public ResponseEntity<?> approveActivity(@PathVariable Long id) {

@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
     List<Activity> findByStatus(String status);
+    List<Activity> findByUserId(Long userId); // 添加通过 userId 查找活动的方法
 }
