@@ -8,7 +8,7 @@
         <p>账号：{{ username }}</p>
         <p>ID：{{ userId }}</p>
         <p>角色：{{ role }}</p>
-        <el-button type="primary">编辑资料</el-button>
+        <el-button type="primary" @click="open">编辑资料</el-button>
       </div>
     </div>
     <div class="club-list">
@@ -61,9 +61,24 @@ import { computed, ref, onMounted } from 'vue';
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
 import { format } from 'date-fns';
+import { myMsgBox } from './myMsgBox';
 
 export default {
   name: 'PageOne',
+  methods: {
+    open() {
+      myMsgBox('完善个人资料', '编辑资料', {
+        showIcon: true,
+        type: 'success',
+      })
+        .then((data) => {
+          console.log('then中获取值', data);
+        })
+        .catch(() => {
+          console.log('catch就是关闭弹窗');
+        });
+    },
+  },
   setup() {
     const userId = localStorage.getItem('userId');
     const username = localStorage.getItem('username');
@@ -132,6 +147,8 @@ export default {
       await fetchApplications();
       await fetchFavorites();
     });
+
+    
 
     return {
       username,

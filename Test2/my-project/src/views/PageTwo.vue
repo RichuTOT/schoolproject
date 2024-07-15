@@ -33,6 +33,11 @@
           </el-table-column>
           <el-table-column prop="author" label="发布人" width="180"></el-table-column>
           <el-table-column prop="category" label="类别" width="180"></el-table-column>
+          <el-table-column label="介绍">
+        <template #default="scope">
+          <el-button link type="text" @click="openDrawer(scope.row)">Open</el-button>
+        </template>
+      </el-table-column>
           <el-table-column label="收藏" width="150">
             <template v-slot="scope">
               <el-button
@@ -80,6 +85,11 @@ import { format } from 'date-fns';
 export default {
   name: 'PageTwo',
   data() {
+    const openDrawer = (row) => {
+      drawerVisible.value = true;
+      drawerContent.value = row.description;
+    };
+
     return {
       searchQuery: '',
       clubs: [],
@@ -89,6 +99,7 @@ export default {
       userId: localStorage.getItem('userId'), // assuming you store userId in localStorage
       appliedClubs: [], // 存储已申请的社团
       favoriteClubs: [], // 存储收藏的社团
+      openDrawer,
     };
   },
   computed: {
