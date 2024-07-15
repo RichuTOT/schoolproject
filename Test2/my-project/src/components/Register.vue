@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <header class="header">
-      <h1>社团联盟登录平台</h1>
+      <h1>社团联盟注册平台</h1>
     </header>
     <el-form :model="registerForm" ref="registerForm" :rules="rules" label-width="80px" class="form">
       <el-form-item label="用户名" prop="username">
@@ -31,6 +31,7 @@
 
 <script>
 import axios from 'axios';
+import { ElMessage } from 'element-plus';
 
 export default {
   name: 'Register',
@@ -65,13 +66,13 @@ export default {
     handleRegister() {
       this.$refs.registerForm.validate((valid) => {
         if (valid) {
-          axios.post('/api/users/register', this.registerForm)
+          axios.post('http://localhost:8088/api/users/register', this.registerForm)
             .then(response => {
-              alert(response.data);
-              this.$router.push({ name: 'Login' }); // 注册成功后跳转到登录页面
+              ElMessage.success('注册成功');
+              this.$router.push('/login');
             })
             .catch(error => {
-              alert(`错误: ${error.response ? error.response.data : error.message}`);
+              ElMessage.error('注册失败');
             });
         } else {
           console.log('error submit!!');
@@ -96,7 +97,6 @@ export default {
   margin-top: 50px;
   text-align: center;
   height: 400px; /* 固定高度 */
-
 }
 
 .form {
@@ -116,7 +116,6 @@ export default {
 .header {
   margin-bottom: 20px;
 }
-
 .header h1 {
   font-size: 24px;
   margin: 0;

@@ -53,8 +53,15 @@ export default {
         if (valid) {
           axios.post('/api/users/login', this.loginForm)
             .then(response => {
-              alert(response.data);
-              this.$router.push({ name: 'Dashboard' }); // 跳转到新的页面
+              const user = response.data;
+              localStorage.setItem('userId', user.id);
+              localStorage.setItem('username', user.username);
+              localStorage.setItem('role', user.role);
+              if (user.role === 'admin') {
+                this.$router.push({ name: 'AdminDashboard' });
+              } else {
+                this.$router.push({ name: 'Dashboard' });
+              }
             })
             .catch(error => {
               alert(`错误: ${error.response ? error.response.data : error.message}`);
@@ -82,7 +89,6 @@ export default {
   margin-top: 50px;
   text-align: center;
   height: 400px; /* 固定高度 */
-  
 }
 
 .form {
@@ -111,8 +117,6 @@ export default {
 .alternative-login {
   text-align: center;
   margin-top: 170px;
-
-
 }
 
 .icons {

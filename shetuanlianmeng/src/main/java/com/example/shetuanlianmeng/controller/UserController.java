@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -15,9 +17,9 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
-        boolean isAuthenticated = userService.authenticate(user.getUsername(), user.getPassword());
-        if (isAuthenticated) {
-            return ResponseEntity.ok("登录成功");
+        User authenticatedUser = userService.authenticate(user.getUsername(), user.getPassword());
+        if (authenticatedUser != null) {
+            return ResponseEntity.ok(authenticatedUser);
         } else {
             return ResponseEntity.status(401).body("用户名或密码错误");
         }
@@ -31,5 +33,12 @@ public class UserController {
         } else {
             return ResponseEntity.status(400).body("注册失败");
         }
+    }
+
+    @PostMapping("/{userId}/role")
+    public ResponseEntity<?> updateUserRole(@PathVariable Long userId, @RequestBody Map<String, String> roleRequest) {
+        String role = roleRequest.get("role");
+        userService.updateUserRole(userId, role);
+        return ResponseEntity.ok("角色更新成功");
     }
 }

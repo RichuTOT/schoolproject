@@ -4,7 +4,9 @@ import com.example.shetuanlianmeng.entity.Application;
 import com.example.shetuanlianmeng.repository.ApplicationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -13,20 +15,14 @@ public class ApplicationService {
     @Autowired
     private ApplicationRepository applicationRepository;
 
-    public Application applyToClub(Application application) {
-        application.setStatus("PENDING");
+    @Transactional
+    public Application saveApplication(Application application) {
+        application.setDate(LocalDateTime.now());
         return applicationRepository.save(application);
     }
 
-    public Application reviewApplication(Long id, String status) {
-        Application application = applicationRepository.findById(id).orElseThrow();
-        application.setStatus(status);
-        return applicationRepository.save(application);
+    @Transactional(readOnly = true)
+    public List<Application> getApplicationsByUserId(Long userId) {
+        return applicationRepository.findByUserId(userId);
     }
-
-    public List<Application> getAllApplications() {
-        return applicationRepository.findAll();
-    }
-
-    // 其他申请相关操作
 }

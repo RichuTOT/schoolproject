@@ -1,12 +1,11 @@
 <template>
   <div class="common-layout">
-    
     <el-container>
       <el-header class="header">
         <div class="header-content">
-          <span>欢迎</span>
-          <el-button type="primary" @click="logout">退出登录</el-button>
-        
+          <span>登录平台</span>
+          
+          <el-button class="logout-button" type="primary" @click="logout">退出登录</el-button>
         </div>
       </el-header>
    
@@ -17,9 +16,9 @@
             class="el-menu-vertical-demo"
             @select="handleMenuSelect"
           >
-          <el-menu-item index="1">
+            <el-menu-item index="1">
               <i class="el-icon-message"></i>
-              <span slot="title">Menu</span>
+              <span slot="title">首页</span>
             </el-menu-item>
             <el-menu-item index="2">
               <i class="el-icon-message"></i>
@@ -30,17 +29,21 @@
               <span slot="title">搜索社团</span>
             </el-menu-item>
             <el-menu-item index="4">
-              <i class="el-icon-setting"></i>
-              <span slot="title">Navigator Three</span>
+              <i class="el-icon-message"></i>
+              <span slot="title">社团交流</span>
             </el-menu-item>
             <el-menu-item index="5">
-              <i class="el-icon-message"></i>
-              <span slot="title">Navigator Four</span>
-            </el-menu-item>
+              <i class="el-icon-setting"></i>
+              <span slot="title">创建社团</span>            
+            </el-menu-item>       
             <el-menu-item index="6">
-              <i class="el-icon-message"></i>
-              <span slot="title">Navigator Five</span>            
-            </el-menu-item>        
+              <i class="el-icon-setting"></i>
+              <span slot="title">活动发布</span>
+            </el-menu-item> 
+            <el-menu-item index="7">
+              <i class="el-icon-setting"></i>
+              <span slot="title">成员管理</span>
+            </el-menu-item> 
           </el-menu>          
         </el-aside>
         
@@ -53,15 +56,31 @@
 </template>
 
 <script>
+import { ElMessage } from 'element-plus';
+
 export default {
   name: 'Dashboard',
   data() {
     return {
-      activeMenu: '1'
+      activeMenu: '1',
+      userRole: localStorage.getItem('role') || 'member', // assuming you store userRole in localStorage
+      username: localStorage.getItem('username') || '' // assuming you store username in localStorage
     };
   },
   methods: {
     handleMenuSelect(key, keyPath) {
+      console.log('Selected menu item:', key);
+      console.log('Current user role:', this.userRole);
+
+      if ((key === '6' || key === '7') && this.userRole !== 'clubleader') {
+        console.log('User is not clubleader, showing warning message.');
+        ElMessage({
+          message: '只有成立了社团才能使用该功能',
+          type: 'warning',
+        });
+        return;
+      }
+
       switch (key) {
         case '1':
           this.$router.push({ name: 'Content' });
@@ -73,15 +92,18 @@ export default {
           this.$router.push({ name: 'PageTwo' });
           break;
         case '4':
-          this.$router.push({ name: 'PageThree' });
+          this.$router.push({ name: 'PageFour' });
           break;
         case '5':
-          this.$router.push({ name: 'PageFour' });
+          this.$router.push({ name: 'PageFive' });
           break;
         case '6':
-          this.$router.push({ name: 'PageFour' });
+          this.$router.push({ name: 'PageThree' });
           break;
-        default:         
+        case '7':
+          this.$router.push({ name: 'Members' });
+          break;
+        default:
           break;
       }
     },
@@ -90,6 +112,11 @@ export default {
       console.log('退出登录');
       this.$router.push({ name: 'Login' });
     }
+  },
+  created() {
+    console.log('Dashboard created, user role:', this.userRole);
+    console.log('Dashboard created, username:', this.username);
+    this.$router.push({ path: '/dashboard/content' });
   }
 };
 </script>
@@ -101,7 +128,7 @@ export default {
 
 .header {
   background-color: #409EFF;
-  width: 1500px ;
+  width: 100%;
   color: #000000;
   line-height: 60px;
   display: flex;
@@ -111,20 +138,29 @@ export default {
 
 .header-content {
   display: flex;
+  justify-content: space-between;
   align-items: center;
+  width: 100%;
+}
+
+.logout-button {
+  margin-left: auto;
+}
+
+.username {
+  margin-left: 20px;
+  font-size: 16px;
+  color: #fff;
 }
 
 .aside {
   background-color: #f5f5f5;
-
 }
 
-.main { /*主内容区域CSS */
+.main { 
   background-color: #fff;
-  height: 500px;
-  padding: 10px;
-  margin: 5px;
+  height: 700px;
+  width: 1500px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1); 
 }
-
 </style>

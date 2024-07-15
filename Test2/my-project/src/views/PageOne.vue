@@ -5,30 +5,160 @@
         <img src="https://via.placeholder.com/100" alt="用户头像" />
       </div>
       <div class="account-info">
-        <p>账号：xxxxxxxxxxx</p>
-        <el-button type="primary">编辑资料</el-button>
+        <p>账号：{{ username }}</p>
+        <p>ID：{{ userId }}</p>
+        <p>角色：{{ role }}</p>
+        <el-button type="primary" @click="open">编辑资料</el-button>
       </div>
     </div>
     <div class="club-list">
-      <h3>社团清单</h3>
-      <el-table :data="clubs" style="width: 100%">
-        <el-table-column prop="date" label="时间" width="180"></el-table-column>
+      <h3>社团审批流程</h3>
+      <el-table :data="sortedApplicationRequests" style="width: 100%">
+        <el-table-column prop="date" label="申请时间" width="180">
+          <template v-slot="scope">
+            <span>{{ formatDate(scope.row.date) }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="name" label="社团名称" width="180"></el-table-column>
-        <el-table-column prop="status" label="审核状态" width="180"></el-table-column>
+        <el-table-column prop="category" label="类别" width="180"></el-table-column>
+        <el-table-column prop="status" label="审批状态" width="180">
+          <template v-slot="scope">
+            <span :style="{ color: getStatusColor(scope.row.status) }">
+              {{ scope.row.status }}
+            </span>
+          </template>
+        </el-table-column>
       </el-table>
+      <div v-if="sortedApplicationRequests.length === 0" class="no-requests">暂无申请</div>
+
+      <h3>收藏的社团</h3>
+      <el-table :data="sortedFavoriteClubs" style="width: 100%">
+        <el-table-column prop="date" label="收藏时间" width="180">
+          <template v-slot="scope">
+            <span>{{ formatDate(scope.row.date) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="name" label="社团名称" width="180"></el-table-column>
+        <el-table-column prop="category" label="类别" width="180"></el-table-column>
+        <el-table-column label="操作" width="150">
+          <template v-slot="scope">
+            <el-button
+              type="danger"
+              @click="removeFavorite(scope.row)"
+            >
+              取消收藏
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div v-if="sortedFavoriteClubs.length === 0" class="no-favorites">暂无收藏的社团</div>
     </div>
   </div>
 </template>
 
 <script>
+import { computed, ref, onMounted } from 'vue';
+import axios from 'axios';
+import { ElMessage } from 'element-plus';
+import { format } from 'date-fns';
+import { myMsgBox } from './myMsgBox';
+
 export default {
   name: 'PageOne',
-  data() {
+  methods: {
+    open() {
+      myMsgBox('完善个人资料', '编辑资料', {
+        showIcon: true,
+        type: 'success',
+      })
+        .then((data) => {
+          console.log('then中获取值', data);
+        })
+        .catch(() => {
+          console.log('catch就是关闭弹窗');
+        });
+    },
+  },
+  setup() {
+    const userId = localStorage.getItem('userId');
+    const username = localStorage.getItem('username');
+    const role = localStorage.getItem('role');
+    const applicationRequests = ref([]);
+    const favoriteClubs = ref([]);
+    const sortedApplicationRequests = computed(() => {
+      return applicationRequests.value.sort((a, b) => new Date(b.date) - new Date(a.date));
+    });
+    const sortedFavoriteClubs = computed(() => {
+      return favoriteClubs.value.sort((a, b) => new Date(b.date) - new Date(a.date));
+    });
+
+    const fetchApplications = async () => {
+      try {
+        const response = await axios.get(`/api/applications/user/${userId}`);
+        applicationRequests.value = response.data;
+      } catch (error) {
+        console.error('Error fetching application requests:', error);
+        ElMessage.error('获取社团申请数据失败');
+      }
+    };
+
+    const fetchFavorites = async () => {
+      try {
+        const response = await axios.get(`/api/favorites/user/${userId}`);
+        favoriteClubs.value = response.data;
+      } catch (error) {
+        console.error('Error fetching favorites:', error);
+        ElMessage.error('获取收藏社团数据失败');
+      }
+    };
+
+    const getStatusColor = (status) => {
+      switch (status) {
+        case '审批中':
+          return 'orange';
+        case '申请通过':
+          return 'green';
+        case '申请失败':
+          return 'red';
+        default:
+          return 'black';
+      }
+    };
+
+    const removeFavorite = async (club) => {
+      try {
+        await axios.delete(`/api/favorites`, {
+          data: { userId: userId, name: club.name },
+          withCredentials: true,
+        });
+        favoriteClubs.value = favoriteClubs.value.filter(fav => fav.name !== club.name);
+        ElMessage.success('取消收藏成功');
+      } catch (error) {
+        console.error('Error removing favorite:', error);
+        ElMessage.error('取消收藏失败');
+      }
+    };
+
+    const formatDate = (dateString) => {
+      return format(new Date(dateString), 'yyyy-MM-dd');
+    };
+
+    onMounted(async () => {
+      await fetchApplications();
+      await fetchFavorites();
+    });
+
+    
+
     return {
-      clubs: [
-        { date: '2024-07-05', name: '社团A', status: '已通过' },
-        { date: '2024-07-05', name: '社团B', status: '审核中' },
-      ],
+      username,
+      userId,
+      role,
+      sortedApplicationRequests,
+      sortedFavoriteClubs,
+      getStatusColor,
+      removeFavorite,
+      formatDate,
     };
   },
 };
@@ -76,5 +206,11 @@ export default {
 
 .el-table th, .el-table td {
   text-align: center;
+}
+
+.no-favorites, .no-requests {
+  text-align: center;
+  color: #999;
+  margin-top: 20px;
 }
 </style>

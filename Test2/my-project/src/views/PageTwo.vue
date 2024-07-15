@@ -1,139 +1,251 @@
 <template>
-  <div class="search-club">
-    <div class="search-bar">
-      <el-input
-        v-model="searchQuery"
-        placeholder="输入社团名称"
-        prefix-icon="el-icon-search"
-        @keyup.enter="handleSearch"
-      />
-      <el-button type="primary" @click="handleSearch">点击搜索</el-button>
-    </div>
-
-    <el-table :data="filteredClubs" class="club-table" style="margin-top: 20px;">
-      <el-table-column prop="name" label="社团名称" width="180"></el-table-column>
-      <el-table-column prop="date" label="发布时间" width="180"></el-table-column>
-      <el-table-column prop="author" label="发布人" width="180"></el-table-column>
-      <el-table-column prop="category" label="类别" width="180"></el-table-column>
-      <el-table-column label="操作" width="100">
-        <template v-slot="scope">
-          <el-button type="text" @click="applyClub(scope.row)">申请</el-button>
+  <el-container style="height: 100vh;">
+    <el-aside width="200px" style="background-color: #f2f2f2;">
+      <!-- 侧边栏内容 -->
+      <el-menu default-active="all" class="el-menu-vertical-demo" @select="handleCategorySelect">
+        <el-menu-item index="all">全部</el-menu-item>
+        <el-menu-item index="学术类">学术类</el-menu-item>
+        <el-menu-item index="文体类">文体类</el-menu-item>
+        <el-menu-item index="志愿服务类">志愿服务类</el-menu-item>
+        <el-menu-item index="休闲类">休闲类</el-menu-item>
+      </el-menu>
+    </el-aside>
+    <el-container>
+      <el-header style="background-color: #b3c0d1; display: flex; align-items: center;">
+        <!-- 头部内容 -->
+        <el-input
+          v-model="searchQuery"
+          placeholder="输入搜索内容"
+          prefix-icon="el-icon-search"
+          @keyup.enter="handleSearch"
+          style="margin-right: 10px; flex: 1;"
+        />
+        <el-button type="primary" @click="handleSearch">点击搜索</el-button>
+      </el-header>
+      <el-main>
+        <!-- 主内容 -->
+        <el-table :data="paginatedClubs" class="club-table" style="margin-top: 20px;">
+          <el-table-column prop="name" label="社团名称" width="180"></el-table-column>
+          <el-table-column prop="date" label="发布时间" width="180">
+            <template v-slot="scope">
+              <span>{{ formatDate(scope.row.date) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="author" label="发布人" width="180"></el-table-column>
+          <el-table-column prop="category" label="类别" width="180"></el-table-column>
+          <el-table-column label="介绍">
+        <template #default="scope">
+          <el-button link type="text" @click="openDrawer(scope.row)">Open</el-button>
         </template>
       </el-table-column>
-    </el-table>
-
-    <div class="club-category" style="margin-top: 20px;">
-      <h3>社团分类</h3>
-      <el-row>
-        <el-col :span="4">
-          <el-menu
-            default-active="1"
-            class="el-menu-vertical-demo"
-            @select="handleCategorySelect"
-          >
-            <el-menu-item index="1">学术类</el-menu-item>
-            <el-menu-item index="2">文体类</el-menu-item>
-            <el-menu-item index="3">志愿服务类</el-menu-item>
-            <el-menu-item index="4">休闲类</el-menu-item>
-          </el-menu>
-        </el-col>
-        <el-col :span="20">
-          <el-table :data="filteredByCategoryClubs" class="club-table">
-            <el-table-column prop="name" label="社团名称" width="180"></el-table-column>
-            <el-table-column prop="date" label="发布时间" width="180"></el-table-column>
-            <el-table-column prop="author" label="发布人" width="180"></el-table-column>
-            <el-table-column prop="category" label="类别" width="180"></el-table-column>
-          </el-table>
-        </el-col>
-      </el-row>
-    </div>
-  </div>
+          <el-table-column label="收藏" width="150">
+            <template v-slot="scope">
+              <el-button
+                :type="isFavorite(scope.row) ? 'danger' : 'success'"
+                @click="toggleFavorite(scope.row)"
+              >
+                {{ isFavorite(scope.row) ? '取消收藏' : '收藏' }}
+              </el-button>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="150">
+            <template v-slot="scope">
+              <el-button
+                :type="isApplied(scope.row) ? 'info' : 'primary'"
+                @click="applyClub(scope.row)"
+                :disabled="isApplied(scope.row)"
+              >
+                {{ isApplied(scope.row) ? '已申请' : '申请' }}
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div v-if="!filteredClubs.length" class="no-data">
+          无合适社团
+        </div>
+        <el-pagination
+          v-if="filteredClubs.length"
+          style="margin-top: 20px;"
+          background
+          layout="prev, pager, next"
+          :total="filteredClubs.length"
+          :page-size="pageSize"
+          @current-change="handlePageChange"
+        />
+      </el-main>
+    </el-container>
+  </el-container>
 </template>
 
 <script>
+import axios from 'axios';
+import { ElMessage } from 'element-plus';
+import { format } from 'date-fns';
+
 export default {
   name: 'PageTwo',
   data() {
+    const openDrawer = (row) => {
+      drawerVisible.value = true;
+      drawerContent.value = row.description;
+    };
+
     return {
       searchQuery: '',
-      clubs: [
-        { name: '社团A', date: '2024-07-05', author: '张三', category: '学术类' },
-        { name: '社团B', date: '2024-07-05', author: '李四', category: '文体类' },
-        { name: '社团C', date: '2024-07-05', author: '王五', category: '志愿服务类' },
-        { name: '皇姓社团', date: '2024-07-05', author: '刘六', category: '休闲类' },
-      ],
-      selectedCategory: '',
+      clubs: [],
+      currentPage: 1,
+      pageSize: 10, // 每页显示的条数
+      selectedCategory: 'all',
+      userId: localStorage.getItem('userId'), // assuming you store userId in localStorage
+      appliedClubs: [], // 存储已申请的社团
+      favoriteClubs: [], // 存储收藏的社团
+      openDrawer,
     };
   },
   computed: {
     filteredClubs() {
-      return this.clubs.filter(club => club.name.includes(this.searchQuery));
+      return this.clubs.filter(club => {
+        const searchRegex = new RegExp(this.searchQuery, 'i');
+        const matchesSearchQuery = (
+          searchRegex.test(club.name) ||
+          searchRegex.test(club.date) ||
+          searchRegex.test(club.author) ||
+          searchRegex.test(club.category)
+        );
+        const matchesCategory = (
+          this.selectedCategory === 'all' || club.category === this.selectedCategory
+        );
+        return matchesSearchQuery && matchesCategory;
+      });
     },
-    filteredByCategoryClubs() {
-      return this.selectedCategory
-        ? this.clubs.filter(club => club.category === this.selectedCategory)
-        : this.clubs;
+    paginatedClubs() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      return this.filteredClubs.slice(start, end);
     },
   },
   methods: {
-    handleSearch() {
-      // 搜索逻辑
-    },
-    applyClub(club) {
-      // 申请社团逻辑
-      console.log(`申请加入: ${club.name}`);
-    },
-    handleCategorySelect(key, keyPath) {
-      switch (key) {
-        case '1':
-          this.selectedCategory = '学术类';
-          break;
-        case '2':
-          this.selectedCategory = '文体类';
-          break;
-        case '3':
-          this.selectedCategory = '志愿服务类';
-          break;
-        case '4':
-          this.selectedCategory = '休闲类';
-          break;  
-        default:
-          this.selectedCategory = '';
-          break;
+    async fetchClubs() {
+      try {
+        const response = await axios.get('/api/clubs', { withCredentials: true });
+        this.clubs = response.data;
+      } catch (error) {
+        console.error('Error fetching clubs:', error);
       }
     },
+    async fetchAppliedClubs() {
+      try {
+        const response = await axios.get(`/api/applications/user/${this.userId}`, { withCredentials: true });
+        this.appliedClubs = response.data.map(application => application.name);
+      } catch (error) {
+        console.error('Error fetching applied clubs:', error);
+      }
+    },
+    async fetchFavoriteClubs() {
+      try {
+        const response = await axios.get(`/api/favorites/user/${this.userId}`, { withCredentials: true });
+        this.favoriteClubs = response.data.map(favorite => favorite.name);
+      } catch (error) {
+        console.error('Error fetching favorite clubs:', error);
+      }
+    },
+    handleSearch() {
+      this.currentPage = 1; // 重置分页到第一页
+    },
+    async applyClub(club) {
+      try {
+        await axios.post('/api/applications', {
+          name: club.name,
+          category: club.category,
+          userId: this.userId,
+          status: '审批中',
+          date: new Date().toISOString()
+        }, { withCredentials: true });
+        this.appliedClubs.push(club.name); // 更新已申请的社团列表
+        ElMessage.success('申请已提交');
+      } catch (error) {
+        console.error('Error applying for club:', error);
+        ElMessage.error('申请提交失败');
+      }
+    },
+    async toggleFavorite(club) {
+      try {
+        if (this.isFavorite(club)) {
+          const response = await axios.delete(`/api/favorites`, {
+            data: { userId: this.userId, name: club.name },
+            withCredentials: true,
+          });
+          this.favoriteClubs = this.favoriteClubs.filter(name => name !== club.name); // 更新收藏的社团列表
+          ElMessage.success('取消收藏成功');
+        } else {
+          await axios.post('/api/favorites', {
+            name: club.name,
+            category: club.category,
+            userId: this.userId,
+            date: new Date().toISOString(),
+          }, { withCredentials: true });
+          this.favoriteClubs.push(club.name); // 更新收藏的社团列表
+          ElMessage.success('已收藏');
+        }
+      } catch (error) {
+        console.error('Error toggling favorite:', error);
+        ElMessage.error('操作失败');
+      }
+    },
+    handlePageChange(page) {
+      this.currentPage = page;
+    },
+    handleCategorySelect(key) {
+      this.selectedCategory = key;
+      this.currentPage = 1; // 重置分页到第一页
+    },
+    isFavorite(club) {
+      return this.favoriteClubs.includes(club.name);
+    },
+    isApplied(club) {
+      return this.appliedClubs.includes(club.name);
+    },
+    formatDate(dateString) {
+      return format(new Date(dateString), 'yyyy-MM-dd');
+    }
+  },
+  async mounted() {
+    await this.fetchClubs();
+    await this.fetchAppliedClubs();
+    await this.fetchFavoriteClubs();
   },
 };
 </script>
 
+
 <style scoped>
-.search-club {
-  padding: 20px;
+.el-container {
+  height: 100vh;
 }
 
-.search-bar {
+.el-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
+  padding: 0 20px;
 }
 
-.search-bar .el-input {
-  flex: 1;
-  margin-right: 10px;
-}
-
-.club-table {
-  width: 100%;
-}
-
-.club-category {
-  margin-top: 20px;
-}
-
-.el-menu-vertical-demo {
-  border-right: none;
+.el-main {
+  height: calc(100vh - 60px); /* 减去header的高度 */
+  overflow-y: auto;
 }
 
 .el-table th, .el-table td {
+  text-align: center;
+}
+
+.no-data {
+  text-align: center;
+  margin-top: 20px;
+  color: #909399;
+}
+
+.el-pagination {
   text-align: center;
 }
 </style>

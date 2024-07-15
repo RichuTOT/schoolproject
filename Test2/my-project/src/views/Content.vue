@@ -1,35 +1,121 @@
 <template>
-    <div class="content">
-      <img src="../assets/tu.jpg"  />
-      <p>活动详情</p>
-      
+  <div class="homepage">
+    <el-carousel :interval="5000" arrow="always">
+      <el-carousel-item v-for="(item, index) in carouselItems" :key="index">
+        <img :src="item.src" class="carousel-image" />
+      </el-carousel-item>
+    </el-carousel>
+
+    <div class="activities">
+      <h2>社团活动</h2>
+      <div class="activity-container" v-for="(activity, index) in sortedActivities" :key="index">
+        <div class="activity-details">
+          <h3 class="club-name">{{ activity.clubName }}</h3>
+          <p class="activity-name">活动名称：{{ activity.name }}</p>
+          <p class="activity-description">详情：{{ activity.description }}</p>
+          <p class="activity-date">{{ formatDate(activity.publishTime) }}</p>
+          <div v-if="activity.images.length">
+            <img :src="activity.images[0]" class="activity-image" />
+          </div>
+        </div>
+      </div>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    name: 'Content'
-  };
-  </script>
-  
-  <style scoped>
-  .content {
-    text-align: center;
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+import { ref, onMounted, computed } from 'vue';
+import { format, isValid } from 'date-fns';
+
+export default {
+  name: 'Home',
+  setup() {
+    const activities = ref([]);
+    const carouselItems = ref([
+      { src: 'image1.jpg' },
+      { src: 'image2.jpg' },
+      { src: 'image3.jpg' }
+    ]);
+
+    const fetchActivities = async () => {
+      try {
+        const response = await axios.get('http://localhost:8088/api/activities/approved');
+        activities.value = response.data;
+      } catch (error) {
+        console.error('Error fetching activities:', error);
+      }
+    };
+
+    onMounted(() => {
+      fetchActivities();
+    });
+
+    const sortedActivities = computed(() => {
+      return activities.value.sort((a, b) => new Date(b.publishTime) - new Date(a.publishTime));
+    });
+
+    const formatDate = (dateString) => {
+      const date = new Date(dateString);
+      return isValid(date) ? format(date, 'yyyy-MM-dd HH:mm:ss') : 'Invalid Date';
+    };
+
+    return {
+      activities,
+      sortedActivities,
+      formatDate,
+      carouselItems
+    };
   }
-  
-  .content img {
-    max-width: 100%;
-    height: 200px;
-    margin-bottom: 20px;
-  }
-  
-  .content p {
-    display: flex;
-    font-size: 16px;
-  }
-  
-  .content p a:hover {
-    text-decoration: underline;
-  }
-  </style>
-  
+};
+</script>
+
+<style scoped>
+.homepage {
+  padding: 20px;
+}
+
+.carousel-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+.activities {
+  margin-top: 20px;
+}
+
+.activity-container {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 20px;
+}
+
+.activity-details {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.club-name {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.activity-name,
+.activity-description,
+.activity-location {
+  margin: 5px 0;
+}
+
+.activity-date {
+  font-size: 12px;
+  color: #909399;
+  margin: 5px 0;
+}
+
+.activity-image {
+  width: 200px;
+  margin-top: 10px;
+}
+</style>
