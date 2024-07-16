@@ -80,9 +80,9 @@ export default {
       try {
         const response = await axios.get(`http://localhost:8088/api/club-applications/user?userId=${userId}`);
         const sortedApplications = response.data.sort((a, b) => {
-          if (a.status === '通过' && b.status !== '通过') {
+          if (a.status === 'approved' && b.status !== 'approved') {
             return -1;
-          } else if (a.status !== '通过' && b.status === '通过') {
+          } else if (a.status !== 'approved' && b.status === 'approved') {
             return 1;
           } else {
             return new Date(b.applyTime) - new Date(a.applyTime);
@@ -118,7 +118,7 @@ export default {
         return;
       }
 
-      const existingApplications = clubApplications.value.filter(app => app.status === '审批中' || app.status === '通过');
+      const existingApplications = clubApplications.value.filter(app => app.status === 'pending' || app.status === 'approved');
       if (existingApplications.length > 0) {
         ElMessage({
           message: '已经申请过了，正在审核或已通过，耐心等待~',
@@ -131,7 +131,7 @@ export default {
         ...form.value,
         userId: userId,
         applyTime: new Date().toISOString(),
-        status: '审批中'
+        status: 'pending'
       };
       try {
         const response = await axios.post('http://localhost:8088/api/club-applications', clubApplicationData, { withCredentials: true });
@@ -159,17 +159,17 @@ export default {
     };
 
     const formatStatus = (status) => {
-      if (status === '审批中') {
+      if (status === 'pending') {
         return '审核中';
       }
-      return status === '通过' ? '已同意' : '已拒绝';
+      return status === 'approved' ? '已同意' : '已拒绝';
     };
 
     const statusClass = (status) => {
-      if (status === '审批中') {
-        return '审批中-status';
-      } else if (status === '通过') {
-        return '通过-status';
+      if (status === 'pending') {
+        return 'pending-status';
+      } else if (status === 'approved') {
+        return 'approved-status';
       } else {
         return 'rejected-status';
       }
@@ -213,11 +213,11 @@ export default {
   margin-right: 20px;
 }
 
-.审批中-status {
+.pending-status {
   color: yellow;
 }
 
-.通过-status {
+.approved-status {
   color: green;
 }
 

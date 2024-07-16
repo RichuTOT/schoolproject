@@ -82,7 +82,9 @@ const approveClub = async (row) => {
         type: 'success',
         message: '社团已同意',
       });
-      await fetch(`http://localhost:8088/api/clubs`, {
+
+      // 在批准后将社团信息写入 club 表，包括 userId
+      const clubResponse = await fetch('http://localhost:8088/api/clubs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -92,10 +94,15 @@ const approveClub = async (row) => {
           author: row.publisher,
           date: row.applyTime,
           category: row.category,
-          userId: row.userId, // 添加 userId
+          userId: row.userId, // 确保 userId 被传递
         }),
       });
-      await updateUserRole(row.userId, 'clubleader');
+      
+      if (clubResponse.ok) {
+        await updateUserRole(row.userId, 'clubleader');
+      } else {
+        throw new Error('写入社团数据失败');
+      }
     } else {
       throw new Error('批准失败');
     }
@@ -132,6 +139,7 @@ const rejectClub = async (row) => {
   }
 };
 
+
 const updateUserRole = async (userId, role) => {
   try {
     const response = await fetch(`http://localhost:8088/api/users/${userId}/role`, {
@@ -151,6 +159,7 @@ const updateUserRole = async (userId, role) => {
     });
   }
 };
+
 
 const fetchClubs = async () => {
   try {

@@ -66,6 +66,7 @@ public class ClubApplicationService {
         club.setAuthor(application.getPublisher());
         club.setDate(application.getApplyTime());
         club.setCategory(application.getCategory());
+        club.setUserId(Long.valueOf(application.getUserId())); // 确保 userId 被传递
         clubRepository.save(club);
 
         // 更新用户角色
