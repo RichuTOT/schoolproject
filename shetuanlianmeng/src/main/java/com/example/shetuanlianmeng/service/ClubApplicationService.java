@@ -1,7 +1,9 @@
 package com.example.shetuanlianmeng.service;
 
+import com.example.shetuanlianmeng.entity.Application;
 import com.example.shetuanlianmeng.entity.Club;
 import com.example.shetuanlianmeng.entity.ClubApplication;
+import com.example.shetuanlianmeng.repository.ApplicationRepository;
 import com.example.shetuanlianmeng.repository.ClubApplicationRepository;
 import com.example.shetuanlianmeng.repository.ClubRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -22,6 +25,9 @@ public class ClubApplicationService {
 
     @Autowired
     private ClubRepository clubRepository;
+
+    @Autowired
+    private ApplicationRepository applicationRepository;
 
     @Autowired
     private UserService userService;
@@ -66,11 +72,21 @@ public class ClubApplicationService {
         club.setAuthor(application.getPublisher());
         club.setDate(application.getApplyTime());
         club.setCategory(application.getCategory());
-        club.setUserId(Long.valueOf(application.getUserId())); // 确保 userId 被传递
+        club.setUserId(Long.valueOf(application.getUserId()));
         clubRepository.save(club);
 
-        // 更新用户角色
+        // 更新用户角色为clubleader
         userService.updateUserRole(Long.valueOf(application.getUserId()), "clubleader");
+
+        // 添加记录到Application表中，表示用户成为了社团的clubleader
+        Application newApplication = new Application();
+        newApplication.setName(application.getClubName());
+        newApplication.setCategory(application.getCategory());
+        newApplication.setUserId(Long.valueOf(application.getUserId()));
+        newApplication.setDate(LocalDateTime.now());
+        newApplication.setStatus("approved");
+        newApplication.setRole("clubleader");
+        applicationRepository.save(newApplication);
     }
 
     public void rejectClubApplication(Long id) {

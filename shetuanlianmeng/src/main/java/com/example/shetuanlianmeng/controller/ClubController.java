@@ -11,8 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/clubs")
@@ -40,6 +40,11 @@ public class ClubController {
     }
 
     @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Club>> getClubsByUserId(@PathVariable Long userId) {
+        List<Club> clubs = clubService.getClubsByUserId(userId);
+        return ResponseEntity.ok(clubs);
+    }
+    @GetMapping("/user/{userId}/getclub")
     public ResponseEntity<?> getClubByUserId(@PathVariable Long userId) {
         Optional<Club> club = clubService.getClubByUserId(userId);
         if (club.isPresent()) {

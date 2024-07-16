@@ -139,7 +139,6 @@ const rejectClub = async (row) => {
   }
 };
 
-
 const updateUserRole = async (userId, role) => {
   try {
     const response = await fetch(`http://localhost:8088/api/users/${userId}/role`, {
@@ -159,7 +158,6 @@ const updateUserRole = async (userId, role) => {
     });
   }
 };
-
 
 const fetchClubs = async () => {
   try {
@@ -183,6 +181,8 @@ const sortedClubs = computed(() => {
   });
 });
 </script>
+
+
 
 <style scoped>
 .club-approval {
