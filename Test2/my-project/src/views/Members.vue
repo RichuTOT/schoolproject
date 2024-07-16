@@ -5,9 +5,9 @@
       <el-scrollbar style="height: 300px;">
         <el-table :data="studentApplications" style="width: 100%">
           <el-table-column prop="name" label="姓名" width="180"></el-table-column>
-          <el-table-column prop="id" label="学号" width="180"></el-table-column>
-          <el-table-column prop="date" label="申请时间" width="180"></el-table-column>
-          <el-table-column prop="reason" label="申请理由"></el-table-column>
+          <el-table-column prop="studentId" label="学号" width="180"></el-table-column>
+          <el-table-column prop="category" label="性别" width="100"></el-table-column>
+          <el-table-column prop="formattedDate" label="申请时间" width="180"></el-table-column>
           <el-table-column label="操作" width="180">
             <template #default="scope">
               <el-button @click="approveApplication(scope.row)" type="primary" size="small">通过</el-button>
@@ -21,8 +21,9 @@
       <h3>社员管理表</h3>
       <el-table :data="members" style="width: 100%">
         <el-table-column prop="name" label="姓名" width="180"></el-table-column>
-        <el-table-column prop="id" label="学号" width="180"></el-table-column>
+        <el-table-column prop="studentId" label="学号" width="180"></el-table-column>
         <el-table-column prop="gender" label="性别" width="100"></el-table-column>
+        <el-table-column prop="formattedDate" label="申请时间" width="180"></el-table-column>
         <el-table-column label="操作" width="180">
           <template #default="scope">
             <el-button @click="removeMember(scope.row)" type="danger" size="small">删除</el-button>
@@ -34,33 +35,72 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import { format } from 'date-fns';
 
-const studentApplications = ref([
-  { name: '小明', id: '2019000001', date:'xx/xx/xxxx', reason: '从小热爱音乐，想加入社团结交跟自己一样喜欢音乐的好朋友，一起参加音乐活动，享受音乐带来的快乐。' },
-  { name: '蓝蓝', id: '2019000080', date:'xx/xx/xxxx', reason: '从小热爱音乐，想加入社团结交跟自己一样喜欢音乐的好朋友，一起参加音乐活动，享受音乐带来的快乐。' },
-  { name: '小红', id: '2019123456', date:'xx/xx/xxxx', reason: '从小热爱音乐，想加入社团结交跟自己一样喜欢音乐的好朋友，一起参加音乐活动，享受音乐带来的快乐。' },
-]);
+const studentApplications = ref([]);
+const members = ref([]);
 
-const members = ref([
-  { name: '小明', id: '2019000001', gender: '男' },
-  { name: '丽丽', id: '2019000012', gender: '女' },
-  { name: '莉莉', id: '2019000036', gender: '女' },
-  { name: '力力', id: '2019000101', gender: '男' },
-  { name: '黎黎', id: '2019000009', gender: '女' },
-]);
-
-const approveApplication = (application) => {
-  console.log('批准申请:', application);
+const fetchApplications = async (userId) => {
+  try {
+    const response = await axios.get(`http://localhost:8088/api/applications/with-user-info?userId=${userId}`);
+    studentApplications.value = response.data.map(application => ({
+      ...application,
+      formattedDate: format(new Date(application.date), 'yyyy-MM-dd')
+    }));
+  } catch (error) {
+    console.error('Error fetching applications:', error);
+  }
 };
 
-const rejectApplication = (application) => {
-  console.log('拒绝申请:', application);
+const fetchMembers = async () => {
+  try {
+    const response = await axios.get('http://localhost:8088/api/members');
+    members.value = response.data.map(member => ({
+      ...member,
+      formattedDate: format(new Date(member.date), 'yyyy-MM-dd')
+    }));
+  } catch (error) {
+    console.error('Error fetching members:', error);
+  }
 };
 
-const removeMember = (member) => {
-  console.log('删除社员:', member);
+const approveApplication = async (application) => {
+  try {
+    await axios.post(`http://localhost:8088/api/applications/approve/${application.id}`);
+    application.status = 'approved';
+    console.log('批准申请:', application);
+  } catch (error) {
+    console.error('Error approving application:', error);
+  }
 };
+
+const rejectApplication = async (application) => {
+  try {
+    await axios.post(`http://localhost:8088/api/applications/reject/${application.id}`);
+    application.status = 'rejected';
+    console.log('拒绝申请:', application);
+  } catch (error) {
+    console.error('Error rejecting application:', error);
+  }
+};
+
+const removeMember = async (member) => {
+  try {
+    await axios.delete(`http://localhost:8088/api/members/${member.id}`);
+    members.value = members.value.filter(m => m.id !== member.id);
+    console.log('删除社员:', member);
+  } catch (error) {
+    console.error('Error removing member:', error);
+  }
+};
+
+onMounted(() => {
+  const userId = localStorage.getItem('userId');
+  fetchApplications(userId);
+  fetchMembers();
+});
 </script>
 
 <style scoped>

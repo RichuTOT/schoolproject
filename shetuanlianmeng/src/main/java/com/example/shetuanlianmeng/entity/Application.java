@@ -20,6 +20,8 @@ public class Application {
     private Long userId;
     private LocalDateTime date;
     private String status;
+    private String studentId; // 添加 studentId 字段
+    private String formattedDate; // 添加 formattedDate 字段
     
     // Getters and Setters
 
@@ -69,5 +71,21 @@ public class Application {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
+    }
+
+    public String getFormattedDate() {
+        return formattedDate;
+    }
+
+    public void setFormattedDate(String formattedDate) {
+        this.formattedDate = formattedDate;
     }
 }

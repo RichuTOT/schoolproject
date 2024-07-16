@@ -26,4 +26,11 @@ public class ApplicationController {
         List<Application> applications = applicationService.getApplicationsByUserId(userId);
         return ResponseEntity.ok(applications);
     }
+
+    @GetMapping("/with-user-info")
+    public ResponseEntity<List<Application>> getApplicationsWithUserInfo(@RequestParam Long userId) {
+        List<Application> applicationsWithUserInfo = applicationService.getApplicationsWithUserInfo(userId);
+        return ResponseEntity.ok(applicationsWithUserInfo);
+    }
+
 }
