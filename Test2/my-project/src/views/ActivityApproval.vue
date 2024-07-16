@@ -1,6 +1,6 @@
 <template>
   <div class="activity-approval">
-    <el-table :data="filteredActivities" style="width: 100%">
+    <el-table v-if="filteredActivities.length > 0" :data="filteredActivities" style="width: 100%">
       <el-table-column prop="clubName" label="申请社团" width="180"></el-table-column>
       <el-table-column prop="name" label="活动名称" width="180"></el-table-column>
       <el-table-column prop="publishTime" label="活动时间" width="180">
@@ -37,7 +37,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <div v-if="filteredActivities.length === 0" class="no-activities">暂无活动</div>
+    <div v-else class="no-activities">暂无活动</div>
   </div>
 </template>
 
