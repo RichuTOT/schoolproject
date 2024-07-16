@@ -26,7 +26,7 @@
         <el-table-column prop="formattedDate" label="申请时间" width="180"></el-table-column>
         <el-table-column label="操作" width="180">
           <template #default="scope">
-            <el-button @click="removeMember(scope.row)" type="danger" size="small">删除</el-button>
+            <el-button @click="confirmRemoveMember(scope.row)" type="danger" size="small">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -61,7 +61,7 @@ const fetchMembers = async (userId) => {
   try {
     const response = await axios.get(`http://localhost:8088/api/applications/with-user-info?userId=${userId}`);
     members.value = response.data
-      .filter(member => member.status === 'approved')
+      .filter(member => member.status === '通过')
       .map(member => ({
         ...member,
         formattedDate: format(new Date(member.date), 'yyyy-MM-dd')
@@ -78,7 +78,11 @@ const confirmAction = (application, action) => {
     cancelButtonText: '取消',
     type: 'warning',
   }).then(() => {
-    action === 'approve' ? approveApplication(application) : rejectApplication(application);
+    if (action === 'approve') {
+      approveApplication(application);
+    } else {
+      rejectApplication(application);
+    }
   }).catch(() => {
     ElMessage.info('已取消操作');
   });
@@ -104,11 +108,23 @@ const rejectApplication = async (application) => {
   }
 };
 
+const confirmRemoveMember = (member) => {
+  ElMessageBox.confirm('确定要移除该社员吗?', '确认操作', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  }).then(() => {
+    removeMember(member);
+  }).catch(() => {
+    ElMessage.info('已取消操作');
+  });
+};
+
 const removeMember = async (member) => {
   try {
-    await axios.delete(`http://localhost:8088/api/members/${member.id}`);
+    await axios.post(`http://localhost:8088/api/applications/reject/${member.id}`);
     members.value = members.value.filter(m => m.id !== member.id);
-    ElMessage.success('社员已删除');
+    ElMessage.success('社员已移除');
   } catch (error) {
     console.error('Error removing member:', error);
   }

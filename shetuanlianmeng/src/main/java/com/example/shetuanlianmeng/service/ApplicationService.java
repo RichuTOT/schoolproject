@@ -64,10 +64,11 @@ public class ApplicationService {
 
     @Transactional
     public void updateApplicationStatus(Long id, String status) {
-        Application application = applicationRepository.findById(id).orElseThrow(() -> new RuntimeException("申请未找到"));
+        Application application = applicationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid application Id:" + id));
         application.setStatus(status);
         applicationRepository.save(application);
     }
+
     @Transactional
     public void deleteApplication(Long id) {
         applicationRepository.deleteById(id);
