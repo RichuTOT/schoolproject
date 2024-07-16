@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 public class ApplicationService {
@@ -24,12 +25,13 @@ public class ApplicationService {
     @Autowired
     private UserRepository userRepository;
 
-     @Autowired
+    @Autowired
     private ClubRepository clubRepository;
 
     @Transactional
     public Application saveApplication(Application application) {
         application.setDate(LocalDateTime.now());
+        application.setStatus("pending"); // 设置默认状态为pending
         return applicationRepository.save(application);
     }
 
@@ -39,15 +41,17 @@ public class ApplicationService {
     }
 
     public List<Application> getApplicationsWithUserInfo(Long currentUserId) {
-        Club userClub = clubRepository.findByUserId(currentUserId).orElse(null);
-        if (userClub == null) {
+        Optional<Club> userClubOptional = clubRepository.findByUserId(currentUserId);
+        if (userClubOptional.isEmpty()) {
             return List.of(); // 当前用户没有加入任何社团，返回空列表
         }
 
+        Club userClub = userClubOptional.get();
         List<Application> applications = applicationRepository.findByName(userClub.getName());
         return applications.stream().map(application -> {
-            User user = userRepository.findById(application.getUserId()).orElse(null);
-            if (user != null) {
+            Optional<User> userOptional = userRepository.findById(application.getUserId());
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
                 application.setName(user.getName());
                 application.setCategory(user.getGender());
                 application.setStudentId(user.getStudentId()); // 设置studentId
@@ -56,5 +60,16 @@ public class ApplicationService {
             }
             return application;
         }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateApplicationStatus(Long id, String status) {
+        Application application = applicationRepository.findById(id).orElseThrow(() -> new RuntimeException("申请未找到"));
+        application.setStatus(status);
+        applicationRepository.save(application);
+    }
+    @Transactional
+    public void deleteApplication(Long id) {
+        applicationRepository.deleteById(id);
     }
 }
