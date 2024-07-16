@@ -13,6 +13,7 @@
           <h3 class="club-name">{{ activity.clubName }}</h3>
           <p class="activity-name">活动名称：{{ activity.name }}</p>
           <p class="activity-description">详情：{{ activity.description }}</p>
+          <p class="activity-location">地点：{{ activity.location }}</p>
           <p class="activity-date">{{ formatDate(activity.publishTime) }}</p>
           <div v-if="activity.images.length">
             <img :src="activity.images[0]" class="activity-image" />
@@ -104,6 +105,7 @@ export default {
 
 .activity-name,
 .activity-description,
+.activity-loaction,
 .activity-location {
   margin: 5px 0;
 }

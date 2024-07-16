@@ -8,7 +8,7 @@
         <p>账号：{{ username }}</p>
         <p>ID：{{ userId }}</p>
         <p>角色：{{ role }}</p>
-        <el-button type="primary" @click="open">编辑资料</el-button>
+        <el-button type="primary" @click="openEditDialog">编辑资料</el-button>
       </div>
     </div>
     <div class="club-list">
@@ -42,17 +42,13 @@
         <el-table-column prop="category" label="类别" width="180"></el-table-column>
         <el-table-column label="操作" width="150">
           <template v-slot="scope">
-            <el-button
-              type="danger"
-              @click="removeFavorite(scope.row)"
-            >
-              取消收藏
-            </el-button>
+            <el-button type="danger" @click="removeFavorite(scope.row)">取消收藏</el-button>
           </template>
         </el-table-column>
       </el-table>
       <div v-if="sortedFavoriteClubs.length === 0" class="no-favorites">暂无收藏的社团</div>
     </div>
+    <my-dialog ref="myDialog" @submit="handleFormSubmit" />
   </div>
 </template>
 
@@ -61,23 +57,12 @@ import { computed, ref, onMounted } from 'vue';
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
 import { format } from 'date-fns';
-import { myMsgBox } from './myMsgBox';
+import MyDialog from './MyForm.vue';
 
 export default {
   name: 'PageOne',
-  methods: {
-    open() {
-      myMsgBox('完善个人资料', '编辑资料', {
-        showIcon: true,
-        type: 'success',
-      })
-        .then((data) => {
-          console.log('then中获取值', data);
-        })
-        .catch(() => {
-          console.log('catch就是关闭弹窗');
-        });
-    },
+  components: {
+    MyDialog,
   },
   setup() {
     const userId = localStorage.getItem('userId');
@@ -85,9 +70,12 @@ export default {
     const role = localStorage.getItem('role');
     const applicationRequests = ref([]);
     const favoriteClubs = ref([]);
+    const myDialog = ref(null);
+
     const sortedApplicationRequests = computed(() => {
       return applicationRequests.value.sort((a, b) => new Date(b.date) - new Date(a.date));
     });
+
     const sortedFavoriteClubs = computed(() => {
       return favoriteClubs.value.sort((a, b) => new Date(b.date) - new Date(a.date));
     });
@@ -143,12 +131,30 @@ export default {
       return format(new Date(dateString), 'yyyy-MM-dd');
     };
 
+    const openEditDialog = async () => {
+      try {
+        const response = await axios.get(`/api/users/${userId}`);
+        myDialog.value.showDialog();
+        myDialog.value.formData = response.data;
+      } catch (error) {
+        console.error('Error fetching user info:', error);
+      }
+    };
+
+    const handleFormSubmit = async (formData) => {
+      try {
+        const response = await axios.put(`/api/users/${userId}`, formData);
+        ElMessage.success('个人资料更新成功');
+      } catch (error) {
+        console.error('Error updating user info:', error);
+        ElMessage.error('个人资料更新失败');
+      }
+    };
+
     onMounted(async () => {
       await fetchApplications();
       await fetchFavorites();
     });
-
-    
 
     return {
       username,
@@ -159,10 +165,14 @@ export default {
       getStatusColor,
       removeFavorite,
       formatDate,
+      openEditDialog,
+      handleFormSubmit,
+      myDialog,
     };
   },
 };
 </script>
+
 
 <style scoped>
 .personal-center {

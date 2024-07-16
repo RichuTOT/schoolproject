@@ -55,4 +55,21 @@ public class UserService {
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
+
+    public User updateUser(Long id, User userDetails) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        
+        user.setName(userDetails.getName());
+        user.setStudentId(userDetails.getStudentId());
+        user.setGender(userDetails.getGender());
+        user.setHeight(userDetails.getHeight());
+        user.setWeight(userDetails.getWeight());
+        user.setBirthday(userDetails.getBirthday());
+        
+        return userRepository.save(user);
+    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+    }
 }

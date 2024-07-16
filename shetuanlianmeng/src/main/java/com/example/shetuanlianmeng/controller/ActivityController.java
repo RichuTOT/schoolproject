@@ -114,6 +114,16 @@ public ResponseEntity<List<Activity>> getActivitiesByUserId(@PathVariable Long u
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/approved")
+    public ResponseEntity<List<Activity>> getApprovedActivities() {
+        List<Activity> activities = activityRepository.findByStatus("approved");
+        for (Activity activity : activities) {
+            List<Image> images = imageRepository.findByActivity(activity);
+            activity.setImages(images.stream().map(Image::getImageUrl).collect(Collectors.toList()));
+        }
+        return ResponseEntity.ok(activities);
+    }
+
     @PostMapping("/reject/{id}")
     public ResponseEntity<?> rejectActivity(@PathVariable Long id) {
         Activity activity = activityRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("活动未找到"));
