@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
 
 @Entity
@@ -21,6 +22,12 @@ public class Application {
     private LocalDateTime date;
     private String status;
     
+    // Transient fields for displaying formatted date and student id
+    @Transient
+    private String formattedDate;
+    @Transient
+    private String studentId;
+
     // Getters and Setters
 
     public Long getId() {
@@ -69,5 +76,21 @@ public class Application {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getFormattedDate() {
+        return formattedDate;
+    }
+
+    public void setFormattedDate(String formattedDate) {
+        this.formattedDate = formattedDate;
+    }
+
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
     }
 }

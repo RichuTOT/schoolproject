@@ -26,4 +26,23 @@ public class ApplicationController {
         List<Application> applications = applicationService.getApplicationsByUserId(userId);
         return ResponseEntity.ok(applications);
     }
+
+    @GetMapping("/with-user-info")
+    public List<Application> getApplicationsWithUserInfo(@RequestParam Long userId) {
+        return applicationService.getApplicationsWithUserInfo(userId);
+    }
+
+    @PostMapping("/approve/{id}")
+    public ResponseEntity<Void> approveApplication(@PathVariable Long id) {
+        applicationService.updateApplicationStatus(id, "通过");
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reject/{id}")
+    public ResponseEntity<Void> rejectApplication(@PathVariable Long id) {
+        applicationService.updateApplicationStatus(id, "拒绝");
+        applicationService.deleteApplication(id);
+        return ResponseEntity.ok().build();
+    }
+
 }

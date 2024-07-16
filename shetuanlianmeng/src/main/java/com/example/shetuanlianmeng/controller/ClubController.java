@@ -1,6 +1,9 @@
 package com.example.shetuanlianmeng.controller;
 
+import com.example.shetuanlianmeng.entity.Application;
 import com.example.shetuanlianmeng.entity.Club;
+import com.example.shetuanlianmeng.repository.ApplicationRepository;
+import com.example.shetuanlianmeng.repository.ClubRepository;
 import com.example.shetuanlianmeng.service.ClubService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,11 @@ public class ClubController {
 
     @Autowired
     private ClubService clubService;
+    @Autowired
+    private ClubRepository clubRepository;
+
+    @Autowired
+    private ApplicationRepository applicationRepository;
 
     @GetMapping
     public List<Club> getAllClubs() {
@@ -40,7 +48,12 @@ public class ClubController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Club not found");
         }
     }
-    
+    @GetMapping("/{clubId}/applications")
+    public ResponseEntity<List<Application>> getApplicationsByClubId(@PathVariable Long clubId) {
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new IllegalArgumentException("社团未找到"));
+        List<Application> applications = applicationRepository.findByName(club.getName());
+        return ResponseEntity.ok(applications);
+    }
 
     @GetMapping("/search")
     public List<Club> searchClubs(@RequestParam String name) {
@@ -72,4 +85,5 @@ public class ClubController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("删除失败: " + e.getMessage());
         }
     }
+    
 }
