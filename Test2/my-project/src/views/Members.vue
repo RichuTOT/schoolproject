@@ -4,11 +4,11 @@
       <h3>学生申请表</h3>
       <el-scrollbar style="height: 300px;">
         <el-table :data="studentApplications" style="width: 100%" empty-text="暂无申请">
-          <el-table-column prop="name" label="姓名" width="180"></el-table-column>
-          <el-table-column prop="studentId" label="学号" width="180"></el-table-column>
-          <el-table-column prop="category" label="性别" width="100"></el-table-column>
-          <el-table-column prop="formattedDate" label="申请时间" width="180"></el-table-column>
-          <el-table-column label="操作" width="180">
+          <el-table-column prop="name" label="姓名" :min-width="200"></el-table-column>
+          <el-table-column prop="studentId" label="学号" :min-width="200"></el-table-column>
+          <el-table-column prop="category" label="性别" :min-width="200"></el-table-column>
+          <el-table-column prop="formattedDate" label="申请时间" :min-width="200"></el-table-column>
+          <el-table-column label="操作" :min-width="200">
             <template #default="scope">
               <el-button @click="confirmAction(scope.row, 'approve')" type="primary" size="small">通过</el-button>
               <el-button @click="confirmAction(scope.row, 'reject')" type="danger" size="small">拒绝</el-button>
@@ -20,11 +20,11 @@
     <div class="member-management">
       <h3>社员管理表</h3>
       <el-table :data="members" style="width: 100%" empty-text="暂无成员">
-        <el-table-column prop="name" label="姓名" width="180"></el-table-column>
-        <el-table-column prop="studentId" label="学号" width="180"></el-table-column>
-        <el-table-column prop="category" label="性别" width="100"></el-table-column>
-        <el-table-column prop="formattedDate" label="申请时间" width="180"></el-table-column>
-        <el-table-column label="操作" width="180">
+        <el-table-column prop="name" label="姓名" :min-width="200"></el-table-column>
+        <el-table-column prop="studentId" label="学号" :min-width="200"></el-table-column>
+        <el-table-column prop="category" label="性别" :min-width="200"></el-table-column>
+        <el-table-column prop="formattedDate" label="申请时间" :min-width="200"></el-table-column>
+        <el-table-column label="操作" :min-width="200">
           <template #default="scope">
             <el-button @click="confirmRemoveMember(scope.row)" type="danger" size="small">删除</el-button>
           </template>

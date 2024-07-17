@@ -2,11 +2,10 @@
   <div class="personal-center">
     <div class="user-info">
       <div class="avatar">
-        <img src="https://via.placeholder.com/100" alt="用户头像" />
+        <img src="../assets/touxiang3.jpg" alt="用户头像" />
       </div>
       <div class="account-info">
         <p>账号：{{ username }}</p>
-        <p>ID：{{ userId }}</p>
         <p>角色：{{ role }}</p>
         <el-button type="primary" @click="openEditDialog">编辑资料</el-button>
       </div>
@@ -14,14 +13,14 @@
     <div class="club-list">
       <h3>社团审批流程</h3>
       <el-table :data="sortedApplicationRequests" style="width: 100%" empty-text="暂无申请">
-        <el-table-column prop="date" label="申请时间" width="180">
+        <el-table-column prop="date" label="申请时间" :min-width="180">
           <template v-slot="scope">
             <span>{{ formatDate(scope.row.date) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="社团名称" width="180"></el-table-column>
-        <el-table-column prop="category" label="类别" width="180"></el-table-column>
-        <el-table-column prop="status" label="审批状态" width="180">
+        <el-table-column prop="name" label="社团名称" :min-width="180"></el-table-column>
+        <el-table-column prop="category" label="类别" :min-width="180"></el-table-column>
+        <el-table-column prop="status" label="审批状态" :min-width="180">
           <template v-slot="scope">
             <span :style="{ color: getStatusColor(scope.row.status) }">
               {{ scope.row.status }}
@@ -32,14 +31,14 @@
 
       <h3>收藏的社团</h3>
       <el-table :data="sortedFavoriteClubs" style="width: 100%" empty-text="暂无收藏的社团">
-        <el-table-column prop="date" label="收藏时间" width="180">
+        <el-table-column prop="date" label="收藏时间" :min-width="180">
           <template v-slot="scope">
             <span>{{ formatDate(scope.row.date) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="社团名称" width="180"></el-table-column>
-        <el-table-column prop="category" label="类别" width="180"></el-table-column>
-        <el-table-column label="操作" width="150">
+        <el-table-column prop="name" label="社团名称" :min-width="180"></el-table-column>
+        <el-table-column prop="category" label="类别" :min-width="180"></el-table-column>
+        <el-table-column label="操作" :min-width="180">
           <template v-slot="scope">
             <el-button type="danger" @click="removeFavorite(scope.row)">取消收藏</el-button>
           </template>
@@ -156,7 +155,6 @@ export default {
 
     return {
       username,
-      userId,
       role,
       sortedApplicationRequests,
       sortedFavoriteClubs,

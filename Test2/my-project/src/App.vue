@@ -70,11 +70,11 @@ nav {
 nav a {
   margin: 0 15px;
   text-decoration: none;
-  color: #000;
+  color: #ffffff;
 }
 
 nav a:hover {
-  color: #fff;
+  color: #edea2b;
 }
 
 #app {

@@ -3,10 +3,10 @@
     <el-aside width="200px" style="background-color: #f2f2f2;">
       <el-menu default-active="all" class="el-menu-vertical-demo" @select="handleCategorySelect">
         <el-menu-item index="all">全部</el-menu-item>
-        <el-menu-item index="学术类">学术类</el-menu-item>
-        <el-menu-item index="文体类">文体类</el-menu-item>
-        <el-menu-item index="志愿服务类">志愿服务类</el-menu-item>
-        <el-menu-item index="休闲类">休闲类</el-menu-item>
+        <el-menu-item index="文学类">文学类</el-menu-item>
+        <el-menu-item index="体育类">体育类</el-menu-item>
+        <el-menu-item index="哲学类">哲学类</el-menu-item>
+        <el-menu-item index="其他">其他</el-menu-item>
       </el-menu>
     </el-aside>
     <el-container>
@@ -21,7 +21,7 @@
         <el-button type="primary" @click="handleSearch">点击搜索</el-button>
       </el-header>
       <el-main>
-        <el-table :data="paginatedClubs" class="club-table" style="margin-top: 20px;">
+        <el-table :data="paginatedClubs" class="club-table" style="margin-top: 20px;" empty-text="暂无合适社团">
           <el-table-column prop="name" label="社团名称" width="180"></el-table-column>
           <el-table-column prop="date" label="发布时间" width="180">
             <template v-slot="scope">
@@ -32,7 +32,7 @@
           <el-table-column prop="category" label="类别" width="180"></el-table-column>
           <el-table-column label="介绍">
             <template #default="scope">
-              <el-button link @click="openDialog(scope.row)">Open</el-button>
+              <el-button link @click="openDialog(scope.row)">详细</el-button>
             </template>
           </el-table-column>
           <el-table-column label="收藏" width="150">
@@ -57,7 +57,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <div v-if="!filteredClubs.length" class="no-data">无合适社团</div>
+        
         <el-pagination
           v-if="filteredClubs.length"
           style="margin-top: 20px;"

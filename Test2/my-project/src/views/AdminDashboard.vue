@@ -97,7 +97,7 @@ export default {
 .header {
   background-color: #409EFF;
   width: 100%;
-  color: #000000;
+  color: #ffffff;
   line-height: 60px;
   display: flex;
   justify-content: space-between;
@@ -109,6 +109,8 @@ export default {
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  font-weight: bold;
+  font-size: 20px;
 }
 
 .logout-button {
