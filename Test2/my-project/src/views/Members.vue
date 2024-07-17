@@ -3,7 +3,7 @@
     <div class="student-application">
       <h3>学生申请表</h3>
       <el-scrollbar style="height: 300px;">
-        <el-table :data="studentApplications" style="width: 100%">
+        <el-table :data="studentApplications" style="width: 100%" empty-text="暂无申请">
           <el-table-column prop="name" label="姓名" width="180"></el-table-column>
           <el-table-column prop="studentId" label="学号" width="180"></el-table-column>
           <el-table-column prop="category" label="性别" width="100"></el-table-column>
@@ -19,7 +19,7 @@
     </div>
     <div class="member-management">
       <h3>社员管理表</h3>
-      <el-table :data="members" style="width: 100%">
+      <el-table :data="members" style="width: 100%" empty-text="暂无成员">
         <el-table-column prop="name" label="姓名" width="180"></el-table-column>
         <el-table-column prop="studentId" label="学号" width="180"></el-table-column>
         <el-table-column prop="category" label="性别" width="100"></el-table-column>

@@ -13,7 +13,7 @@
     </div>
     <div class="club-list">
       <h3>社团审批流程</h3>
-      <el-table :data="sortedApplicationRequests" style="width: 100%">
+      <el-table :data="sortedApplicationRequests" style="width: 100%" empty-text="暂无申请">
         <el-table-column prop="date" label="申请时间" width="180">
           <template v-slot="scope">
             <span>{{ formatDate(scope.row.date) }}</span>
@@ -29,10 +29,9 @@
           </template>
         </el-table-column>
       </el-table>
-      <div v-if="sortedApplicationRequests.length === 0" class="no-requests">暂无申请</div>
 
       <h3>收藏的社团</h3>
-      <el-table :data="sortedFavoriteClubs" style="width: 100%">
+      <el-table :data="sortedFavoriteClubs" style="width: 100%" empty-text="暂无收藏的社团">
         <el-table-column prop="date" label="收藏时间" width="180">
           <template v-slot="scope">
             <span>{{ formatDate(scope.row.date) }}</span>
@@ -46,7 +45,6 @@
           </template>
         </el-table-column>
       </el-table>
-      <div v-if="sortedFavoriteClubs.length === 0" class="no-favorites">暂无收藏的社团</div>
     </div>
     <my-dialog ref="myDialog" @submit="handleFormSubmit" />
   </div>
@@ -143,7 +141,7 @@ export default {
 
     const handleFormSubmit = async (formData) => {
       try {
-        const response = await axios.put(`/api/users/${userId}`, formData);
+        await axios.put(`/api/users/${userId}`, formData);
         ElMessage.success('个人资料更新成功');
       } catch (error) {
         console.error('Error updating user info:', error);
@@ -172,7 +170,6 @@ export default {
   },
 };
 </script>
-
 
 <style scoped>
 .personal-center {

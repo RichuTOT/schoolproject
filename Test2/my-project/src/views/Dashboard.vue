@@ -4,7 +4,6 @@
       <el-header class="header">
         <div class="header-content">
           <span>登录平台</span>
-          
           <el-button class="logout-button" type="primary" @click="logout">退出登录</el-button>
         </div>
       </el-header>
@@ -17,31 +16,31 @@
             @select="handleMenuSelect"
           >
             <el-menu-item index="1">
-              <i class="el-icon-message"></i>
+              <el-icon><home-filled /></el-icon>
               <span slot="title">首页</span>
             </el-menu-item>
             <el-menu-item index="2">
-              <i class="el-icon-message"></i>
+              <el-icon><user /></el-icon>
               <span slot="title">个人中心</span>
             </el-menu-item>
             <el-menu-item index="3">
-              <i class="el-icon-menu"></i>
+              <el-icon><search /></el-icon>
               <span slot="title">搜索社团</span>
             </el-menu-item>
             <el-menu-item index="4">
-              <i class="el-icon-message"></i>
+              <el-icon><chat-dot-round /></el-icon>
               <span slot="title">社团交流</span>
             </el-menu-item>
             <el-menu-item index="5">
-              <i class="el-icon-setting"></i>
+              <el-icon><edit /></el-icon>
               <span slot="title">创建社团</span>            
             </el-menu-item>       
             <el-menu-item index="6">
-              <i class="el-icon-setting"></i>
+              <el-icon><calendar /></el-icon>
               <span slot="title">活动发布</span>
             </el-menu-item> 
             <el-menu-item index="7">
-              <i class="el-icon-setting"></i>
+              <el-icon><user /></el-icon>
               <span slot="title">成员管理</span>
             </el-menu-item> 
           </el-menu>          
@@ -57,14 +56,30 @@
 
 <script>
 import { ElMessage } from 'element-plus';
+import {
+  HomeFilled,
+  User,
+  Search,
+  ChatDotRound,
+  Edit,
+  Calendar
+} from '@element-plus/icons-vue';
 
 export default {
   name: 'Dashboard',
+  components: {
+    HomeFilled,
+    User,
+    Search,
+    ChatDotRound,
+    Edit,
+    Calendar,
+  },
   data() {
     return {
       activeMenu: '1',
-      userRole: localStorage.getItem('role') || 'member', // assuming you store userRole in localStorage
-      username: localStorage.getItem('username') || '' // assuming you store username in localStorage
+      userRole: localStorage.getItem('role') || 'member',
+      username: localStorage.getItem('username') || ''
     };
   },
   methods: {
@@ -108,7 +123,6 @@ export default {
       }
     },
     logout() {
-      // 退出登录逻辑
       console.log('退出登录');
       this.$router.push({ name: 'Login' });
     }
