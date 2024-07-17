@@ -10,4 +10,5 @@ import java.util.List;
 public interface ClubApplicationRepository extends JpaRepository<ClubApplication, Long> {
     List<ClubApplication> findByUserId(String userId);
     void deleteByClubName(String clubName);
+    List<ClubApplication> findByClubName(String clubName);
 }

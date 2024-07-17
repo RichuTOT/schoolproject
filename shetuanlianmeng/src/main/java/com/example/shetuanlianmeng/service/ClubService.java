@@ -1,6 +1,8 @@
 package com.example.shetuanlianmeng.service;
 
+import com.example.shetuanlianmeng.entity.Application;
 import com.example.shetuanlianmeng.entity.Club;
+import com.example.shetuanlianmeng.repository.ApplicationRepository;
 import com.example.shetuanlianmeng.repository.ClubApplicationRepository;
 import com.example.shetuanlianmeng.repository.ClubRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ClubService {
@@ -18,6 +21,9 @@ public class ClubService {
 
     @Autowired
     private ClubApplicationRepository clubApplicationRepository;
+
+    @Autowired
+    private ApplicationRepository applicationRepository;
 
     public List<Club> getAllClubs() {
         return clubRepository.findAll();
@@ -47,5 +53,17 @@ public class ClubService {
         Club club = clubRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("社团未找到"));
         clubApplicationRepository.deleteByClubName(club.getName());
         clubRepository.deleteById(id);
+    }
+
+    public List<Club> getClubsByUserId(Long userId) {
+        List<Application> applications = applicationRepository.findByUserIdAndStatus(userId, "approved");
+        List<Application> passedApplications = applicationRepository.findByUserIdAndStatus(userId, "通过");
+        applications.addAll(passedApplications);
+
+        List<String> clubNames = applications.stream()
+                .map(Application::getName)
+                .collect(Collectors.toList());
+
+        return clubRepository.findByNameIn(clubNames);
     }
 }

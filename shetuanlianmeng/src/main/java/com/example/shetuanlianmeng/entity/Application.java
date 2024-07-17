@@ -21,6 +21,7 @@ public class Application {
     private Long userId;
     private LocalDateTime date;
     private String status;
+    private String role; // 添加role字段
     
     // Transient fields for displaying formatted date and student id
     @Transient
@@ -76,6 +77,14 @@ public class Application {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public String getFormattedDate() {

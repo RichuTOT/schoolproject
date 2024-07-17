@@ -115,7 +115,7 @@ export default {
 
     const fetchClubName = async () => {
       try {
-        const response = await axios.get(`http://localhost:8088/api/clubs/user/${userId}`, {
+        const response = await axios.get(`http://localhost:8088/api/clubs/user/${userId}/getclub`, {
           withCredentials: true, // 确保带上凭据信息
         });
         activityForm.value.clubName = response.data.name;
