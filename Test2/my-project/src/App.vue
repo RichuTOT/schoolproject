@@ -34,7 +34,7 @@ export default {
   },
   methods: {
     updateNavVisibility(route) {
-      const hiddenNavPages = ['Content', 'PageOne', 'PageTwo', 'PageThree', 'PageFour', 'PageFive', 'Member','Statistics','ClubApproval','ClubManagement','ActivityApproval'];
+      const hiddenNavPages = ['Content', 'PageOne', 'PageTwo', 'PageThree', 'PageFour', 'PageFive', 'Member','Statistics','ClubApproval','ClubManagement','ActivityApproval','Members'];
       this.showNav = !hiddenNavPages.includes(route.name);
     }
   }
@@ -44,29 +44,21 @@ export default {
 
 <style>
 body {
-  background: url('./assets/altercor.jpg') no-repeat center center fixed;
-  background-size: cover; /* 改为cover，使背景适应屏幕大小 */
+  background: url('./assets/beijing1.jpg') no-repeat center center fixed;
+  background-size: cover;
   margin: 0;
   padding: 0;
 }
 
-.header {
-  text-align: left;
-  padding: 10px 20px;
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-  background-color: #ffffff; 
-}
-
 .header2 {
-  width: 100%; /* 修改为100% */
+  width: 100%;
   text-align: left;
   padding: 10px 20px;
   font-size: 24px;
+  margin-left: 25px;
   font-weight: bold;
   color: #333;
-  background-color: #ffffff; 
+  background-color: #ffffff;
 }
 
 nav {
@@ -78,11 +70,11 @@ nav {
 nav a {
   margin: 0 15px;
   text-decoration: none;
-  color: #000000; /* 将链接颜色改为黑色 */
+  color: #000;
 }
 
 nav a:hover {
-  color: #ffffff; /* 鼠标悬停时的颜色改为白色 */
+  color: #fff;
 }
 
 #app {
@@ -90,5 +82,17 @@ nav a:hover {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
+  width: 100%;
 }
+
+@media (max-width: 768px) {
+  .header2 {
+    font-size: 20px;
+  }
+
+  nav a {
+    margin: 0 10px;
+  }
+}
+
 </style>

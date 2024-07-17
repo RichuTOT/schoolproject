@@ -10,7 +10,7 @@
       </el-menu>
     </el-aside>
     <el-container>
-      <el-header style="background-color: #b3c0d1; display: flex; align-items: center;">
+      <el-header style="background-color: #fff; display: flex; align-items: center;">
         <el-input
           v-model="searchQuery"
           placeholder="输入搜索内容"

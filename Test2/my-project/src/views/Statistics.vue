@@ -46,6 +46,7 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   padding: 20px;
+  margin-top: 180px;
 }
 
 .card {
