@@ -22,6 +22,8 @@
             <el-upload
               action="http://localhost:8088/api/activities/upload"
               list-type="picture-card"
+              :headers="uploadHeaders"
+              :data="uploadData"
               :on-preview="handlePictureCardPreview"
               :on-remove="handleRemove"
               :on-success="handleUploadSuccess"
@@ -55,7 +57,6 @@
       </el-table-column>
     </el-table>
     <div v-if="sortedPendingActivities.length === 0" class="no-requests">暂无审核中的活动</div>
-
   </div>
 </template>
 
@@ -95,7 +96,7 @@ export default {
 
     const handleUploadSuccess = (response, file, fileList) => {
       console.log('Upload success:', response);
-      activityForm.value.images.push(response.url);
+      activityForm.value.images.push({ url: response.url, name: file.name });
     };
 
     const handleUploadError = (err, file, fileList) => {
@@ -116,7 +117,7 @@ export default {
     const fetchClubName = async () => {
       try {
         const response = await axios.get(`http://localhost:8088/api/clubs/user/${userId}/getclub`, {
-          withCredentials: true, // 确保带上凭据信息
+          withCredentials: true,
         });
         activityForm.value.clubName = response.data.name;
       } catch (error) {
@@ -130,7 +131,7 @@ export default {
         ...activityForm.value,
         publishTime: new Date().toISOString(),
         status: 'pending',
-        userId: userId // 添加 userId
+        userId: userId
       };
       try {
         const response = await axios.post('http://localhost:8088/api/activities', activityData);
@@ -139,10 +140,10 @@ export default {
           name: '',
           description: '',
           location: '',
-          clubName: activityForm.value.clubName, // 保持社团名称不变
+          clubName: activityForm.value.clubName,
           images: []
         };
-        await fetchPendingActivities(); // Refresh the list of pending activities
+        await fetchPendingActivities();
       } catch (error) {
         console.error('Error publishing activity:', error);
       }
@@ -171,8 +172,16 @@ export default {
 
     onMounted(() => {
       fetchPendingActivities();
-      fetchClubName(); // 获取并设置社团名称
+      fetchClubName();
     });
+
+    const uploadData = {
+      userId,
+    };
+
+    const uploadHeaders = {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    };
 
     return {
       activityForm,
@@ -184,10 +193,12 @@ export default {
       handleUploadSuccess,
       handleUploadError,
       publishActivity,
-      requestUrl, // 暴露请求 URL
-      requestError, // 暴露请求错误信息
-      getStatusColor, // 暴露状态颜色函数
-      formatDate // 暴露日期格式化函数
+      requestUrl,
+      requestError,
+      getStatusColor,
+      formatDate,
+      uploadData,
+      uploadHeaders,
     };
   }
 };

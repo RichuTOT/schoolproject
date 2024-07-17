@@ -7,6 +7,7 @@ import com.example.shetuanlianmeng.repository.ActivityRepository;
 import com.example.shetuanlianmeng.repository.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -18,6 +19,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,32 +27,36 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class ActivityController {
 
+    private final Path fileStorageLocation;
+
     @Autowired
     private ActivityRepository activityRepository;
 
     @Autowired
     private ImageRepository imageRepository;
 
-    @Autowired
-    private FileStorageProperties fileStorageProperties;
+    public ActivityController(FileStorageProperties fileStorageProperties) {
+        this.fileStorageLocation = Paths.get(fileStorageProperties.getUploadDir())
+                .toAbsolutePath().normalize();
+        try {
+            Files.createDirectories(this.fileStorageLocation);
+        } catch (Exception ex) {
+            throw new RuntimeException("Could not create the directory where the uploaded files will be stored.", ex);
+        }
+    }
 
     @PostMapping("/upload")
     public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
         try {
-            Path uploadPath = Paths.get(fileStorageProperties.getUploadDir());
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-
-            String fileName = file.getOriginalFilename();
-            Path filePath = uploadPath.resolve(fileName);
-            Files.copy(file.getInputStream(), filePath);
+            String fileName = StringUtils.cleanPath(UUID.randomUUID().toString() + "_" + file.getOriginalFilename());
+            Path targetLocation = this.fileStorageLocation.resolve(fileName);
+            Files.copy(file.getInputStream(), targetLocation);
 
             String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/uploads/")
                     .path(fileName)
                     .toUriString();
-            
+
             Map<String, String> response = new HashMap<>();
             response.put("url", fileDownloadUri);
             return ResponseEntity.ok(response);
@@ -64,7 +70,7 @@ public class ActivityController {
 
     @PostMapping
     public ResponseEntity<Activity> createActivity(@RequestBody Activity activity) {
-        activity.setStatus("pending"); // 设置活动状态为待审核
+        activity.setStatus("pending");
         Activity savedActivity = activityRepository.save(activity);
         for (String imageUrl : activity.getImages()) {
             Image image = new Image();
@@ -96,15 +102,14 @@ public class ActivityController {
     }
 
     @GetMapping("/user/{userId}")
-public ResponseEntity<List<Activity>> getActivitiesByUserId(@PathVariable Long userId) {
-    List<Activity> activities = activityRepository.findByUserId(userId);
-    for (Activity activity : activities) {
-        List<Image> images = imageRepository.findByActivity(activity);
-        activity.setImages(images.stream().map(Image::getImageUrl).collect(Collectors.toList()));
+    public ResponseEntity<List<Activity>> getActivitiesByUserId(@PathVariable Long userId) {
+        List<Activity> activities = activityRepository.findByUserId(userId);
+        for (Activity activity : activities) {
+            List<Image> images = imageRepository.findByActivity(activity);
+            activity.setImages(images.stream().map(Image::getImageUrl).collect(Collectors.toList()));
+        }
+        return ResponseEntity.ok(activities);
     }
-    return ResponseEntity.ok(activities);
-}
-
 
     @PostMapping("/approve/{id}")
     public ResponseEntity<?> approveActivity(@PathVariable Long id) {
