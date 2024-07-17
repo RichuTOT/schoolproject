@@ -64,11 +64,14 @@ export default {
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         console.log('Loaded messages:', data); // Debug log
-        messages.value = data.map(msg => ({
-          text: msg.message,
-          username: msg.username,
-          sent: msg.userId === userId // 通过比较userId来设置sent属性
-        }));
+        data.forEach(msg => {
+          console.log('Comparing message userId:', msg.userId, 'with local userId:', userId); // Debug log
+          messages.value.push({
+            text: msg.message,
+            username: msg.username,
+            sent: msg.userId.toString() === userId.toString() // 确保类型和值匹配
+          });
+        });
         console.log('Processed messages:', messages.value); // Debug log
         scrollToBottom();
       } catch (error) {
