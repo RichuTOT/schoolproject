@@ -6,8 +6,8 @@ import com.example.shetuanlianmeng.entity.Image;
 import com.example.shetuanlianmeng.repository.ActivityRepository;
 import com.example.shetuanlianmeng.repository.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -19,15 +19,39 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/activities")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class ActivityController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ActivityController.class);
     private final Path fileStorageLocation;
+
+    public ActivityController(FileStorageProperties fileStorageProperties) {
+        logger.info("Initializing ActivityController...");
+        logger.info("Upload directory from FileStorageProperties: {}", fileStorageProperties.getUploadDir());
+
+        String uploadDir = fileStorageProperties.getUploadDir();
+        if (uploadDir == null || uploadDir.isEmpty()) {
+            throw new RuntimeException("Upload directory is null or empty. Please check your configuration.");
+        }
+
+        this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
+        logger.info("Resolved file storage location: {}", this.fileStorageLocation);
+
+        try {
+            Files.createDirectories(this.fileStorageLocation);
+            logger.info("Directories created successfully.");
+        } catch (Exception ex) {
+            logger.error("Could not create the directory where the uploaded files will be stored.", ex);
+            throw new RuntimeException("Could not create the directory where the uploaded files will be stored.", ex);
+        }
+    }
 
     @Autowired
     private ActivityRepository activityRepository;
@@ -35,22 +59,25 @@ public class ActivityController {
     @Autowired
     private ImageRepository imageRepository;
 
-    public ActivityController(FileStorageProperties fileStorageProperties) {
-        this.fileStorageLocation = Paths.get(fileStorageProperties.getUploadDir())
-                .toAbsolutePath().normalize();
-        try {
-            Files.createDirectories(this.fileStorageLocation);
-        } catch (Exception ex) {
-            throw new RuntimeException("Could not create the directory where the uploaded files will be stored.", ex);
-        }
-    }
+    @Value("${file.upload-dir}")
+    private String uploadDir;
 
     @PostMapping("/upload")
     public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
+        logger.info("Handling file upload...");
+
         try {
-            String fileName = StringUtils.cleanPath(UUID.randomUUID().toString() + "_" + file.getOriginalFilename());
-            Path targetLocation = this.fileStorageLocation.resolve(fileName);
-            Files.copy(file.getInputStream(), targetLocation);
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+                logger.info("Uploads directory created: {}", uploadPath.toString());
+            }
+
+            String fileName = file.getOriginalFilename();
+            Path filePath = uploadPath.resolve(fileName);
+            Files.copy(file.getInputStream(), filePath);
+
+            logger.info("File uploaded to: {}", filePath.toString());
 
             String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/uploads/")
@@ -61,7 +88,7 @@ public class ActivityController {
             response.put("url", fileDownloadUri);
             return ResponseEntity.ok(response);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("File upload failed.", e);
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "File upload failed: " + e.getMessage());
             return ResponseEntity.status(500).body(errorResponse);
@@ -70,7 +97,7 @@ public class ActivityController {
 
     @PostMapping
     public ResponseEntity<Activity> createActivity(@RequestBody Activity activity) {
-        activity.setStatus("pending");
+        activity.setStatus("pending"); // 设置活动状态为待审核
         Activity savedActivity = activityRepository.save(activity);
         for (String imageUrl : activity.getImages()) {
             Image image = new Image();
@@ -127,13 +154,5 @@ public class ActivityController {
             activity.setImages(images.stream().map(Image::getImageUrl).collect(Collectors.toList()));
         }
         return ResponseEntity.ok(activities);
-    }
-
-    @PostMapping("/reject/{id}")
-    public ResponseEntity<?> rejectActivity(@PathVariable Long id) {
-        Activity activity = activityRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("活动未找到"));
-        activity.setStatus("rejected");
-        activityRepository.save(activity);
-        return ResponseEntity.ok().build();
     }
 }

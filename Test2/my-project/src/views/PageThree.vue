@@ -22,12 +22,12 @@
             <el-upload
               action="http://localhost:8088/api/activities/upload"
               list-type="picture-card"
-              :headers="uploadHeaders"
-              :data="uploadData"
               :on-preview="handlePictureCardPreview"
               :on-remove="handleRemove"
               :on-success="handleUploadSuccess"
-              :on-error="handleUploadError">
+              :on-error="handleUploadError"
+              :data="uploadData"
+              :headers="uploadHeaders">
               <i class="el-icon-plus"></i>
             </el-upload>
           </el-form-item>
@@ -82,7 +82,6 @@ export default {
     const requestUrl = ref('');
     const requestError = ref('');
 
-    // 从缓存中获取 user_id
     const userId = localStorage.getItem('userId');
 
     const handlePictureCardPreview = (file) => {
@@ -96,7 +95,7 @@ export default {
 
     const handleUploadSuccess = (response, file, fileList) => {
       console.log('Upload success:', response);
-      activityForm.value.images.push({ url: response.url, name: file.name });
+      activityForm.value.images.push(response.url);
     };
 
     const handleUploadError = (err, file, fileList) => {
@@ -175,13 +174,13 @@ export default {
       fetchClubName();
     });
 
-    const uploadData = {
+    const uploadData = () => ({
       userId,
-    };
+    });
 
-    const uploadHeaders = {
+    const uploadHeaders = () => ({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
-    };
+    });
 
     return {
       activityForm,

@@ -2,7 +2,7 @@
   <div class="personal-center">
     <div class="user-info">
       <div class="avatar">
-        <img src="https://via.placeholder.com/100" alt="用户头像" />
+        <img :src="getAvatarUrl(avatarFilename)" alt="用户头像" />
       </div>
       <div class="account-info">
         <p>账号：{{ username }}</p>
@@ -39,6 +39,11 @@
         </el-table-column>
         <el-table-column prop="name" label="社团名称" width="180"></el-table-column>
         <el-table-column prop="category" label="类别" width="180"></el-table-column>
+        <el-table-column label="图片" width="180">
+          <template v-slot="scope">
+            <img :src="getClubImageUrl(scope.row.imageUrl)" alt="社团图片" class="activity-image">
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="150">
           <template v-slot="scope">
             <el-button type="danger" @click="removeFavorite(scope.row)">取消收藏</el-button>
@@ -68,6 +73,7 @@ export default {
     const role = localStorage.getItem('role');
     const applicationRequests = ref([]);
     const favoriteClubs = ref([]);
+    const avatarFilename = ref('default-avatar.png'); // 默认头像文件名
     const myDialog = ref(null);
 
     const sortedApplicationRequests = computed(() => {
@@ -149,6 +155,14 @@ export default {
       }
     };
 
+    const getAvatarUrl = (filename) => {
+      return `/uploads/${filename}`;
+    };
+
+    const getClubImageUrl = (filename) => {
+      return `/uploads/${filename}`;
+    };
+
     onMounted(async () => {
       await fetchApplications();
       await fetchFavorites();
@@ -158,6 +172,7 @@ export default {
       username,
       userId,
       role,
+      avatarFilename,
       sortedApplicationRequests,
       sortedFavoriteClubs,
       getStatusColor,
@@ -165,6 +180,8 @@ export default {
       formatDate,
       openEditDialog,
       handleFormSubmit,
+      getAvatarUrl,
+      getClubImageUrl,
       myDialog,
     };
   },
@@ -219,5 +236,11 @@ export default {
   text-align: center;
   color: #999;
   margin-top: 20px;
+}
+
+.activity-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
 }
 </style>
