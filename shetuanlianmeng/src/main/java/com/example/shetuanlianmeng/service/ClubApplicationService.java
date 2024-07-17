@@ -42,6 +42,15 @@ public class ClubApplicationService {
         return clubApplicationRepository.findByUserId(userId);
     }
 
+    public ClubApplication getClubApplicationById(Long id) {
+        return clubApplicationRepository.findById(id).orElse(null);
+    }   
+
+    public List<ClubApplication> findByClubName(String clubName) {
+        return clubApplicationRepository.findByClubName(clubName);
+    }
+    
+
     public ClubApplication createClubApplication(ClubApplication clubApplication) {
         List<ClubApplication> existingApplications = findByUserId(clubApplication.getUserId());
         for (ClubApplication existingApplication : existingApplications) {

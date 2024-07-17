@@ -9,6 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import org.springframework.http.HttpStatus;
+
 
 @RestController
 @RequestMapping("/api/club-applications")
@@ -27,6 +29,16 @@ public class ClubApplicationController {
     public List<ClubApplication> getClubApplicationsByUserId(@RequestParam("userId") String userId) {
         return clubApplicationService.findByUserId(userId);
     }
+
+    @GetMapping("/name/{clubName}")
+    public ResponseEntity<List<ClubApplication>> getClubApplicationsByClubName(@PathVariable String clubName) {
+        List<ClubApplication> applications = clubApplicationService.findByClubName(clubName);
+        if (applications.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        return ResponseEntity.ok(applications);
+    }
+
 
     @PostMapping
     public ResponseEntity<?> createClubApplication(@RequestBody ClubApplication clubApplication) {

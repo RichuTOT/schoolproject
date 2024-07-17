@@ -1,7 +1,6 @@
 <template>
   <el-container style="height: 100vh;">
     <el-aside width="200px" style="background-color: #f2f2f2;">
-      <!-- 侧边栏内容 -->
       <el-menu default-active="all" class="el-menu-vertical-demo" @select="handleCategorySelect">
         <el-menu-item index="all">全部</el-menu-item>
         <el-menu-item index="学术类">学术类</el-menu-item>
@@ -12,7 +11,6 @@
     </el-aside>
     <el-container>
       <el-header style="background-color: #b3c0d1; display: flex; align-items: center;">
-        <!-- 头部内容 -->
         <el-input
           v-model="searchQuery"
           placeholder="输入搜索内容"
@@ -23,7 +21,6 @@
         <el-button type="primary" @click="handleSearch">点击搜索</el-button>
       </el-header>
       <el-main>
-        <!-- 主内容 -->
         <el-table :data="paginatedClubs" class="club-table" style="margin-top: 20px;">
           <el-table-column prop="name" label="社团名称" width="180"></el-table-column>
           <el-table-column prop="date" label="发布时间" width="180">
@@ -34,10 +31,10 @@
           <el-table-column prop="author" label="发布人" width="180"></el-table-column>
           <el-table-column prop="category" label="类别" width="180"></el-table-column>
           <el-table-column label="介绍">
-        <template #default="scope">
-          <el-button link type="text" @click="openDrawer(scope.row)">Open</el-button>
-        </template>
-      </el-table-column>
+            <template #default="scope">
+              <el-button link @click="openDialog(scope.row)">Open</el-button>
+            </template>
+          </el-table-column>
           <el-table-column label="收藏" width="150">
             <template v-slot="scope">
               <el-button
@@ -60,9 +57,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <div v-if="!filteredClubs.length" class="no-data">
-          无合适社团
-        </div>
+        <div v-if="!filteredClubs.length" class="no-data">无合适社团</div>
         <el-pagination
           v-if="filteredClubs.length"
           style="margin-top: 20px;"
@@ -74,6 +69,9 @@
         />
       </el-main>
     </el-container>
+    <el-dialog v-model="dialogVisible" title="社团详情" width="50%">
+      <InForm v-if="selectedClub" :club="selectedClub" />
+    </el-dialog>
   </el-container>
 </template>
 
@@ -81,25 +79,25 @@
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
 import { format } from 'date-fns';
+import InForm from './InForm.vue';
 
 export default {
   name: 'PageTwo',
+  components: {
+    InForm,
+  },
   data() {
-    const openDrawer = (row) => {
-      drawerVisible.value = true;
-      drawerContent.value = row.description;
-    };
-
     return {
       searchQuery: '',
       clubs: [],
       currentPage: 1,
-      pageSize: 10, // 每页显示的条数
+      pageSize: 10,
       selectedCategory: 'all',
-      userId: localStorage.getItem('userId'), // assuming you store userId in localStorage
-      appliedClubs: [], // 存储已申请的社团
-      favoriteClubs: [], // 存储收藏的社团
-      openDrawer,
+      userId: localStorage.getItem('userId'),
+      appliedClubs: [],
+      favoriteClubs: [],
+      dialogVisible: false,
+      selectedClub: null,
     };
   },
   computed: {
@@ -150,7 +148,7 @@ export default {
       }
     },
     handleSearch() {
-      this.currentPage = 1; // 重置分页到第一页
+      this.currentPage = 1;
     },
     async applyClub(club) {
       try {
@@ -161,7 +159,7 @@ export default {
           status: '审批中',
           date: new Date().toISOString()
         }, { withCredentials: true });
-        this.appliedClubs.push(club.name); // 更新已申请的社团列表
+        this.appliedClubs.push(club.name);
         ElMessage.success('申请已提交');
       } catch (error) {
         console.error('Error applying for club:', error);
@@ -175,7 +173,7 @@ export default {
             data: { userId: this.userId, name: club.name },
             withCredentials: true,
           });
-          this.favoriteClubs = this.favoriteClubs.filter(name => name !== club.name); // 更新收藏的社团列表
+          this.favoriteClubs = this.favoriteClubs.filter(name => name !== club.name);
           ElMessage.success('取消收藏成功');
         } else {
           await axios.post('/api/favorites', {
@@ -184,7 +182,7 @@ export default {
             userId: this.userId,
             date: new Date().toISOString(),
           }, { withCredentials: true });
-          this.favoriteClubs.push(club.name); // 更新收藏的社团列表
+          this.favoriteClubs.push(club.name);
           ElMessage.success('已收藏');
         }
       } catch (error) {
@@ -197,7 +195,7 @@ export default {
     },
     handleCategorySelect(key) {
       this.selectedCategory = key;
-      this.currentPage = 1; // 重置分页到第一页
+      this.currentPage = 1;
     },
     isFavorite(club) {
       return this.favoriteClubs.includes(club.name);
@@ -207,7 +205,17 @@ export default {
     },
     formatDate(dateString) {
       return format(new Date(dateString), 'yyyy-MM-dd');
-    }
+    },
+    async openDialog(club) {
+      try {
+        const response = await axios.get(`/api/club-applications/name/${club.name}`);
+        this.selectedClub = response.data[0];
+        this.dialogVisible = true;
+      } catch (error) {
+        console.error('Error fetching club application details:', error);
+        ElMessage.error('获取社团详情失败');
+      }
+    },
   },
   async mounted() {
     await this.fetchClubs();
@@ -216,7 +224,6 @@ export default {
   },
 };
 </script>
-
 
 <style scoped>
 .el-container {
@@ -231,7 +238,7 @@ export default {
 }
 
 .el-main {
-  height: calc(100vh - 60px); /* 减去header的高度 */
+  height: calc(100vh - 60px);
   overflow-y: auto;
 }
 
