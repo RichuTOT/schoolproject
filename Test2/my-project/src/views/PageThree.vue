@@ -1,31 +1,34 @@
 <template>
   <div class="activity-release">
     <h2>活动发布</h2>
-    <el-form :model="activityForm" label-width="100px">
+    <el-form :model="activityForm" :rules="rules" ref="activityFormRef" label-width="100px">
       <el-row>
         <el-col :span="12">
-          <el-form-item label="活动名称">
+          <el-form-item label="活动名称" prop="name">
             <el-input v-model="activityForm.name" placeholder="请输入"></el-input>
           </el-form-item>
-          <el-form-item label="详细介绍">
+          <el-form-item label="详细介绍" prop="description">
             <el-input type="textarea" v-model="activityForm.description" placeholder="请输入"></el-input>
           </el-form-item>
-          <el-form-item label="活动地点">
+          <el-form-item label="活动地点" prop="location">
             <el-input v-model="activityForm.location" placeholder="请输入"></el-input>
           </el-form-item>
-          <el-form-item label="社团名称">
+          <el-form-item label="社团名称" prop="clubName">
             <el-input v-model="activityForm.clubName" placeholder="请输入" readonly></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="添加图片">
             <el-upload
+              ref="uploadRef"
               action="http://localhost:8088/api/activities/upload"
               list-type="picture-card"
               :on-preview="handlePictureCardPreview"
               :on-remove="handleRemove"
               :on-success="handleUploadSuccess"
-              :on-error="handleUploadError">
+              :on-error="handleUploadError"
+              :data="uploadData"
+              :headers="uploadHeaders">
               <i class="el-icon-plus"></i>
             </el-upload>
           </el-form-item>
@@ -55,7 +58,6 @@
       </el-table-column>
     </el-table>
     <div v-if="sortedPendingActivities.length === 0" class="no-requests">暂无审核中的活动</div>
-
   </div>
 </template>
 
@@ -75,13 +77,21 @@ export default {
       images: []
     });
 
+    const rules = ref({
+      name: [{ required: true, message: '请输入活动名称', trigger: 'blur' }],
+      description: [{ required: true, message: '请输入详细介绍', trigger: 'blur' }],
+      location: [{ required: true, message: '请输入活动地点', trigger: 'blur' }],
+      clubName: [{ required: true, message: '社团名称不能为空', trigger: 'blur' }]
+    });
+
     const dialogImageUrl = ref('');
     const dialogVisible = ref(false);
     const pendingActivities = ref([]);
     const requestUrl = ref('');
     const requestError = ref('');
+    const uploadRef = ref(null);
+    const activityFormRef = ref(null);
 
-    // 从缓存中获取 user_id
     const userId = localStorage.getItem('userId');
 
     const handlePictureCardPreview = (file) => {
@@ -116,7 +126,7 @@ export default {
     const fetchClubName = async () => {
       try {
         const response = await axios.get(`http://localhost:8088/api/clubs/user/${userId}/getclub`, {
-          withCredentials: true, // 确保带上凭据信息
+          withCredentials: true,
         });
         activityForm.value.clubName = response.data.name;
       } catch (error) {
@@ -126,35 +136,43 @@ export default {
     };
 
     const publishActivity = async () => {
-      const activityData = {
-        ...activityForm.value,
-        publishTime: new Date().toISOString(),
-        status: 'pending',
-        userId: userId // 添加 userId
-      };
-      try {
-        const response = await axios.post('http://localhost:8088/api/activities', activityData);
-        console.log('Activity submitted for approval', response.data);
-        activityForm.value = {
-          name: '',
-          description: '',
-          location: '',
-          clubName: activityForm.value.clubName, // 保持社团名称不变
-          images: []
+      activityFormRef.value.validate(async (valid) => {
+        if (!valid) {
+          console.log('表单验证失败');
+          return;
+        }
+
+        const activityData = {
+          ...activityForm.value,
+          publishTime: new Date().toISOString(),
+          status: '审核中',
+          userId: userId
         };
-        await fetchPendingActivities(); // Refresh the list of pending activities
-      } catch (error) {
-        console.error('Error publishing activity:', error);
-      }
+        try {
+          const response = await axios.post('http://localhost:8088/api/activities', activityData);
+          console.log('Activity submitted for approval', response.data);
+          activityForm.value = {
+            name: '',
+            description: '',
+            location: '',
+            clubName: activityForm.value.clubName,
+            images: []
+          };
+          await fetchPendingActivities();
+          uploadRef.value.clearFiles(); // 清空上传文件列表
+        } catch (error) {
+          console.error('Error publishing activity:', error);
+        }
+      });
     };
 
     const getStatusColor = (status) => {
       switch (status) {
-        case 'approved':
+        case '已同意':
           return 'green';
-        case 'rejected':
+        case '已拒绝':
           return 'red';
-        case 'pending':
+        case '审核中':
         default:
           return 'orange';
       }
@@ -171,11 +189,21 @@ export default {
 
     onMounted(() => {
       fetchPendingActivities();
-      fetchClubName(); // 获取并设置社团名称
+      fetchClubName();
+    });
+
+    const uploadData = () => ({
+      userId,
+    });
+
+    const uploadHeaders = () => ({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
 
     return {
       activityForm,
+      rules,
+      activityFormRef,
       dialogImageUrl,
       dialogVisible,
       sortedPendingActivities,
@@ -184,10 +212,13 @@ export default {
       handleUploadSuccess,
       handleUploadError,
       publishActivity,
-      requestUrl, // 暴露请求 URL
-      requestError, // 暴露请求错误信息
-      getStatusColor, // 暴露状态颜色函数
-      formatDate // 暴露日期格式化函数
+      requestUrl,
+      requestError,
+      getStatusColor,
+      formatDate,
+      uploadData,
+      uploadHeaders,
+      uploadRef, // 引用上传组件
     };
   }
 };

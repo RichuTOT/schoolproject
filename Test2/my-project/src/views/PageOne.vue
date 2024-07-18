@@ -67,6 +67,7 @@ export default {
     const role = localStorage.getItem('role');
     const applicationRequests = ref([]);
     const favoriteClubs = ref([]);
+    const avatarFilename = ref('default-avatar.png'); // 默认头像文件名
     const myDialog = ref(null);
 
     const sortedApplicationRequests = computed(() => {
@@ -148,6 +149,14 @@ export default {
       }
     };
 
+    const getAvatarUrl = (filename) => {
+      return `/uploads/${filename}`;
+    };
+
+    const getClubImageUrl = (filename) => {
+      return `/uploads/${filename}`;
+    };
+
     onMounted(async () => {
       await fetchApplications();
       await fetchFavorites();
@@ -156,6 +165,7 @@ export default {
     return {
       username,
       role,
+      avatarFilename,
       sortedApplicationRequests,
       sortedFavoriteClubs,
       getStatusColor,
@@ -163,6 +173,8 @@ export default {
       formatDate,
       openEditDialog,
       handleFormSubmit,
+      getAvatarUrl,
+      getClubImageUrl,
       myDialog,
     };
   },
@@ -217,5 +229,11 @@ export default {
   text-align: center;
   color: #999;
   margin-top: 20px;
+}
+
+.activity-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
 }
 </style>

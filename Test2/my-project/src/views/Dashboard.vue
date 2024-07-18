@@ -4,7 +4,11 @@
       <el-header class="header">
         <div class="header-content">
           <span>登录平台</span>
-          <el-button class="logout-button" type="primary" @click="logout">退出登录</el-button>
+          <div class="user-info">
+            <el-icon><message /></el-icon>
+            <span class="username">{{ username }}</span>
+            <el-button class="logout-button" type="primary" @click="logout">退出登录</el-button>
+          </div>
         </div>
       </el-header>
    
@@ -62,7 +66,8 @@ import {
   Search,
   ChatDotRound,
   Edit,
-  Calendar
+  Calendar,
+  Message
 } from '@element-plus/icons-vue';
 
 export default {
@@ -74,6 +79,7 @@ export default {
     ChatDotRound,
     Edit,
     Calendar,
+    Message,
   },
   data() {
     return {
@@ -160,12 +166,17 @@ export default {
   font-size: 20px;
 }
 
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
 .logout-button {
-  margin-left: auto;
+  margin-left: 20px;
 }
 
 .username {
-  margin-left: 20px;
+  margin-left: 10px;
   font-size: 16px;
   color: #fff;
 }

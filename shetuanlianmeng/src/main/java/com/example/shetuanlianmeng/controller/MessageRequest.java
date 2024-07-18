@@ -1,34 +1,12 @@
-package com.example.shetuanlianmeng.entity;
+package com.example.shetuanlianmeng.controller;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-
-@Entity
-public class Message {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+public class MessageRequest {
     private String message;
-
     private Long userId;
-
     private String username;
-
     private Long clubId;
 
-    private LocalDateTime timestamp;
-
     // Getters and Setters
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getMessage() {
         return message;
@@ -60,13 +38,5 @@ public class Message {
 
     public void setClubId(Long clubId) {
         this.clubId = clubId;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
     }
 }

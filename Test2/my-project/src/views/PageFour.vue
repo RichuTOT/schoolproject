@@ -3,14 +3,15 @@
     <el-row>
       <el-col :span="6">
         <!--选择社团-->
-        <el-select v-model="selectedClub" placeholder="社团名称" @change="loadMessages">
-          <el-option label="所有" value="all"></el-option>
+        <el-select v-model="selectedClub" placeholder="请选择社团" @change="loadMessages">
+          <el-option label="请选择社团" value="" disabled></el-option>
           <el-option
             v-for="club in clubs"
             :key="club.id"
             :label="club.name"
             :value="club.id">
           </el-option>
+          <el-option label="所有" value="9999"></el-option>
         </el-select>
       </el-col>
     </el-row>
@@ -28,7 +29,7 @@
       </el-col>
     </el-row>
     <el-row>
-      <el-col :span="24">
+      <el-col :span="20">
         <!--用于输入消息-->
         <el-input
           type="textarea"
@@ -36,43 +37,43 @@
           @keyup.enter.native="sendMessage"
           placeholder="输入消息">
         </el-input>
-        <el-button type="primary" @click="sendMessage">发送</el-button>
+      </el-col>
+      <el-col :span="4" class="send-button-col">
+        <el-button type="primary" @click="sendMessage" class="send-button">发送</el-button>
       </el-col>
     </el-row>
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 
 export default {
   name: 'PageFour',
   setup() {
-    const selectedClub = ref(null);
+    const selectedClub = ref('');
     const clubs = ref([]);
     const messages = ref([]);
     const newMessage = ref('');
     const userId = localStorage.getItem('userId');
     const username = localStorage.getItem('username');
+    const messagesContainer = ref(null);
 
     const loadMessages = async (clubId) => {
-      // 清空旧消息
-      messages.value = [];
+      if (!clubId) return; // 如果没有选择社团，直接返回
+      messages.value = []; // 清空旧消息
       try {
         const response = await fetch(`http://localhost:8088/api/messages?clubId=${clubId}`);
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        console.log('Loaded messages:', data); // Debug log
         data.forEach(msg => {
-          console.log('Comparing message userId:', msg.userId, 'with local userId:', userId); // Debug log
           messages.value.push({
             text: msg.message,
             username: msg.username,
             sent: msg.userId.toString() === userId.toString() // 确保类型和值匹配
           });
         });
-        console.log('Processed messages:', messages.value); // Debug log
         scrollToBottom();
       } catch (error) {
         console.error('Failed to load messages:', error);
@@ -82,6 +83,10 @@ export default {
     const sendMessage = async () => {
       if (!newMessage.value.trim()) {
         ElMessage.error('消息不能为空');
+        return;
+      }
+      if (!selectedClub.value) {
+        ElMessage.error('请选择社团');
         return;
       }
       try {
@@ -99,13 +104,6 @@ export default {
           }),
         });
         if (!response.ok) throw new Error('Network response was not ok');
-        console.log('Sent message:', {
-          message: newMessage.value,
-          userId: userId,
-          username: username,
-          clubId: selectedClub.value,
-          timestamp: new Date().toISOString()
-        }); // Debug log
         messages.value.push({ text: newMessage.value, username: username, sent: true });
         newMessage.value = '';
         scrollToBottom();
@@ -116,7 +114,7 @@ export default {
     };
 
     const scrollToBottom = () => {
-      const container = document.querySelector('.messages');
+      const container = messagesContainer.value;
       container.scrollTop = container.scrollHeight;
     };
 
@@ -125,7 +123,7 @@ export default {
         const response = await fetch(`http://localhost:8088/api/clubs/user/${userId}`);
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        clubs.value = [{ id: 'all', name: '所有' }, ...data];
+        clubs.value = data;
       } catch (error) {
         console.error('获取社团数据失败', error);
       }
@@ -135,6 +133,12 @@ export default {
       fetchClubs(userId);
     });
 
+    watch(selectedClub, (newClubId) => {
+      if (newClubId) {
+        loadMessages(newClubId);
+      }
+    });
+
     return {
       selectedClub,
       clubs,
@@ -142,6 +146,8 @@ export default {
       newMessage,
       sendMessage,
       loadMessages,
+      scrollToBottom,
+      messagesContainer
     };
   },
 };
@@ -154,7 +160,7 @@ export default {
 
 .chat-container {
   margin-top: 20px;
-  height: 300px;
+  height: calc(100vh - 300px); /* 调整这里的高度来改变聊天框大小 */
   overflow-y: auto;
   border: 1px solid #ddd;
   padding: 10px;
@@ -192,5 +198,15 @@ export default {
 
 .message-text {
   word-break: break-word;
+}
+
+.send-button-col {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+.send-button {
+  width: 100%;
 }
 </style>
