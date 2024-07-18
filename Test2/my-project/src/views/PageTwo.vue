@@ -152,6 +152,16 @@ export default {
     },
     async applyClub(club) {
       try {
+        // 检查用户是否已完成资料编辑
+        const userResponse = await axios.get(`/api/users/${this.userId}`, { withCredentials: true });
+        const user = userResponse.data;
+
+        if (!user.studentId || !user.gender) {
+          ElMessage.error('请先在主页填写个人资料再申请');
+          return;
+        }
+
+        // 用户资料已完成，继续申请
         await axios.post('/api/applications', {
           name: club.name,
           category: club.category,
@@ -159,6 +169,7 @@ export default {
           status: '审批中',
           date: new Date().toISOString()
         }, { withCredentials: true });
+
         this.appliedClubs.push(club.name);
         ElMessage.success('申请已提交');
       } catch (error) {

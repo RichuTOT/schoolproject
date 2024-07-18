@@ -1,19 +1,19 @@
 <template>
   <div class="activity-release">
     <h2>活动发布</h2>
-    <el-form :model="activityForm" label-width="100px">
+    <el-form :model="activityForm" :rules="rules" ref="activityFormRef" label-width="100px">
       <el-row>
         <el-col :span="12">
-          <el-form-item label="活动名称">
+          <el-form-item label="活动名称" prop="name">
             <el-input v-model="activityForm.name" placeholder="请输入"></el-input>
           </el-form-item>
-          <el-form-item label="详细介绍">
+          <el-form-item label="详细介绍" prop="description">
             <el-input type="textarea" v-model="activityForm.description" placeholder="请输入"></el-input>
           </el-form-item>
-          <el-form-item label="活动地点">
+          <el-form-item label="活动地点" prop="location">
             <el-input v-model="activityForm.location" placeholder="请输入"></el-input>
           </el-form-item>
-          <el-form-item label="社团名称">
+          <el-form-item label="社团名称" prop="clubName">
             <el-input v-model="activityForm.clubName" placeholder="请输入" readonly></el-input>
           </el-form-item>
         </el-col>
@@ -77,12 +77,20 @@ export default {
       images: []
     });
 
+    const rules = ref({
+      name: [{ required: true, message: '请输入活动名称', trigger: 'blur' }],
+      description: [{ required: true, message: '请输入详细介绍', trigger: 'blur' }],
+      location: [{ required: true, message: '请输入活动地点', trigger: 'blur' }],
+      clubName: [{ required: true, message: '社团名称不能为空', trigger: 'blur' }]
+    });
+
     const dialogImageUrl = ref('');
     const dialogVisible = ref(false);
     const pendingActivities = ref([]);
     const requestUrl = ref('');
     const requestError = ref('');
     const uploadRef = ref(null);
+    const activityFormRef = ref(null);
 
     const userId = localStorage.getItem('userId');
 
@@ -128,27 +136,34 @@ export default {
     };
 
     const publishActivity = async () => {
-      const activityData = {
-        ...activityForm.value,
-        publishTime: new Date().toISOString(),
-        status: 'pending',
-        userId: userId
-      };
-      try {
-        const response = await axios.post('http://localhost:8088/api/activities', activityData);
-        console.log('Activity submitted for approval', response.data);
-        activityForm.value = {
-          name: '',
-          description: '',
-          location: '',
-          clubName: activityForm.value.clubName,
-          images: []
+      activityFormRef.value.validate(async (valid) => {
+        if (!valid) {
+          console.log('表单验证失败');
+          return;
+        }
+
+        const activityData = {
+          ...activityForm.value,
+          publishTime: new Date().toISOString(),
+          status: 'pending',
+          userId: userId
         };
-        await fetchPendingActivities();
-        uploadRef.value.clearFiles(); // 清空上传文件列表
-      } catch (error) {
-        console.error('Error publishing activity:', error);
-      }
+        try {
+          const response = await axios.post('http://localhost:8088/api/activities', activityData);
+          console.log('Activity submitted for approval', response.data);
+          activityForm.value = {
+            name: '',
+            description: '',
+            location: '',
+            clubName: activityForm.value.clubName,
+            images: []
+          };
+          await fetchPendingActivities();
+          uploadRef.value.clearFiles(); // 清空上传文件列表
+        } catch (error) {
+          console.error('Error publishing activity:', error);
+        }
+      });
     };
 
     const getStatusColor = (status) => {
@@ -187,6 +202,8 @@ export default {
 
     return {
       activityForm,
+      rules,
+      activityFormRef,
       dialogImageUrl,
       dialogVisible,
       sortedPendingActivities,
