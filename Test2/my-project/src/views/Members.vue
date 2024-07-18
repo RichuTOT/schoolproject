@@ -47,7 +47,7 @@ const fetchApplications = async (userId) => {
   try {
     const response = await axios.get(`http://localhost:8088/api/applications/with-user-info?userId=${userId}`);
     studentApplications.value = response.data
-      .filter(application => application.status === 'pending')
+      .filter(application => application.status === '审核中')
       .map(application => ({
         ...application,
         formattedDate: format(new Date(application.date), 'yyyy-MM-dd')
@@ -61,7 +61,7 @@ const fetchMembers = async (userId) => {
   try {
     const response = await axios.get(`http://localhost:8088/api/applications/with-user-info?userId=${userId}`);
     members.value = response.data
-      .filter(member => member.status === '通过')
+      .filter(member => member.status === '已通过')
       .map(member => ({
         ...member,
         formattedDate: format(new Date(member.date), 'yyyy-MM-dd')
@@ -92,6 +92,11 @@ const approveApplication = async (application) => {
   try {
     await axios.post(`http://localhost:8088/api/applications/approve/${application.id}`);
     studentApplications.value = studentApplications.value.filter(app => app.id !== application.id);
+    members.value.push({
+      ...application,
+      status: '已通过',
+      formattedDate: format(new Date(application.date), 'yyyy-MM-dd')
+    });
     ElMessage.success('申请已通过');
   } catch (error) {
     console.error('Error approving application:', error);

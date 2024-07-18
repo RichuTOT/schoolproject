@@ -23,7 +23,7 @@
         <el-table-column prop="status" label="审批状态" :min-width="180">
           <template v-slot="scope">
             <span :style="{ color: getStatusColor(scope.row.status) }">
-              {{ scope.row.status }}
+              {{ formatStatus(scope.row.status) }}
             </span>
           </template>
         </el-table-column>
@@ -100,14 +100,27 @@ export default {
 
     const getStatusColor = (status) => {
       switch (status) {
-        case '审批中':
+        case '审核中':
           return 'orange';
-        case '申请通过':
+        case '已通过':
           return 'green';
-        case '申请失败':
+        case '已拒绝':
           return 'red';
         default:
           return 'black';
+      }
+    };
+
+    const formatStatus = (status) => {
+      switch (status) {
+        case '审核中':
+          return '审核中';
+        case '已通过':
+          return '已通过';
+        case '已拒绝':
+          return '已拒绝';
+        default:
+          return status;
       }
     };
 
@@ -149,14 +162,6 @@ export default {
       }
     };
 
-    const getAvatarUrl = (filename) => {
-      return `/uploads/${filename}`;
-    };
-
-    const getClubImageUrl = (filename) => {
-      return `/uploads/${filename}`;
-    };
-
     onMounted(async () => {
       await fetchApplications();
       await fetchFavorites();
@@ -165,16 +170,14 @@ export default {
     return {
       username,
       role,
-      avatarFilename,
       sortedApplicationRequests,
       sortedFavoriteClubs,
       getStatusColor,
+      formatStatus,
       removeFavorite,
       formatDate,
       openEditDialog,
       handleFormSubmit,
-      getAvatarUrl,
-      getClubImageUrl,
       myDialog,
     };
   },

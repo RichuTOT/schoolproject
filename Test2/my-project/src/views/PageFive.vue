@@ -214,7 +214,7 @@ export default {
 }
 
 .pending-status {
-  color: yellow;
+  color: orange;
 }
 
 .approved-status {

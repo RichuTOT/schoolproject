@@ -34,13 +34,13 @@ public class ApplicationController {
 
     @PostMapping("/approve/{id}")
     public ResponseEntity<Void> approveApplication(@PathVariable Long id) {
-        applicationService.updateApplicationStatus(id, "通过");
+        applicationService.updateApplicationStatus(id, "已通过");
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/reject/{id}")
     public ResponseEntity<Void> rejectApplication(@PathVariable Long id) {
-        applicationService.updateApplicationStatus(id, "拒绝");
+        applicationService.updateApplicationStatus(id, "已拒绝");
         applicationService.deleteApplication(id);
         return ResponseEntity.ok().build();
     }

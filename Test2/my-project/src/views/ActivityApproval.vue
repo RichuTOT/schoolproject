@@ -23,14 +23,14 @@
             type="success" 
             size="mini" 
             @click="confirmApprove(scope.row.id, scope.$index)"
-            :disabled="scope.row.status !== 'pending'"
+            :disabled="scope.row.status !== '审核中'"
             style="margin-right: 10px;">
           同意</el-button>
           <el-button 
             type="danger"  
             size="mini" 
             @click="confirmReject(scope.row.id, scope.$index)"
-            :disabled="scope.row.status !== 'pending'">
+            :disabled="scope.row.status !== '审核中'">
           拒绝</el-button>
         </template>
       </el-table-column>
@@ -85,8 +85,10 @@ export default {
     const approveActivity = async (id, index) => {
       try {
         await axios.post(`http://localhost:8088/api/activities/approve/${id}`);
-        activities.value[index].status = 'approved';
+        activities.value[index].status = '已通过';
         ElMessage.success('活动已通过审核');
+        activities.value.splice(index, 1);
+        fetchActivities();
       } catch (error) {
         console.error('Error approving activity:', error);
         ElMessage.error('审核活动时发生错误');
@@ -96,8 +98,10 @@ export default {
     const rejectActivity = async (id, index) => {
       try {
         await axios.post(`http://localhost:8088/api/activities/reject/${id}`);
-        activities.value[index].status = 'rejected';
+        activities.value[index].status = '已拒绝';
         ElMessage.success('活动已拒绝');
+        activities.value.splice(index, 1);
+        fetchActivities();
       } catch (error) {
         console.error('Error rejecting activity:', error);
         ElMessage.error('拒绝活动时发生错误');
@@ -123,11 +127,11 @@ export default {
 
     const getStatusColor = (status) => {
       switch (status) {
-        case 'approved':
+        case '已通过':
           return 'green';
-        case 'rejected':
+        case '已拒绝':
           return 'red';
-        case 'pending':
+        case '审核中':
         default:
           return 'orange';
       }
@@ -135,11 +139,11 @@ export default {
 
     const filteredActivities = computed(() => {
       return activities.value.filter(activity => 
-        ['pending', 'approved', 'rejected'].includes(activity.status)
+        ['审核中', '已通过', '已拒绝'].includes(activity.status)
       ).sort((a, b) => {
-        if (a.status === 'pending' && b.status !== 'pending') {
+        if (a.status === '审核中' && b.status !== '审核中') {
           return -1;
-        } else if (a.status !== 'pending' && b.status === 'pending') {
+        } else if (a.status !== '审核中' && b.status === '审核中') {
           return 1;
         }
         return new Date(b.publishTime) - new Date(a.publishTime);

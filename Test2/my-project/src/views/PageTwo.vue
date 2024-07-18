@@ -166,7 +166,7 @@ export default {
           name: club.name,
           category: club.category,
           userId: this.userId,
-          status: '审批中',
+          status: '审核中',
           date: new Date().toISOString()
         }, { withCredentials: true });
 
