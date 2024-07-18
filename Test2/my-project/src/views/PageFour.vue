@@ -62,18 +62,15 @@ export default {
 
     const loadMessages = async (clubId) => {
       if (!clubId) return; // 如果没有选择社团，直接返回
-      messages.value = []; // 清空旧消息
       try {
         const response = await fetch(`http://localhost:8088/api/messages?clubId=${clubId}`);
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        data.forEach(msg => {
-          messages.value.push({
-            text: msg.message,
-            username: msg.username,
-            sent: msg.userId.toString() === userId.toString() // 确保类型和值匹配
-          });
-        });
+        messages.value = data.map(msg => ({
+          text: msg.message,
+          username: msg.username,
+          sent: msg.userId.toString() === userId.toString() // 确保类型和值匹配
+        }));
         scrollToBottom();
       } catch (error) {
         console.error('Failed to load messages:', error);

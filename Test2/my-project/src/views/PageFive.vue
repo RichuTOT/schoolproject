@@ -131,7 +131,7 @@ export default {
         ...form.value,
         userId: userId,
         applyTime: new Date().toISOString(),
-        status: 'pending'
+        status: '审核中'
       };
       try {
         const response = await axios.post('http://localhost:8088/api/club-applications', clubApplicationData, { withCredentials: true });
@@ -162,13 +162,13 @@ export default {
       if (status === 'pending') {
         return '审核中';
       }
-      return status === 'approved' ? '已同意' : '已拒绝';
+      return status === '已通过' ? '已通过' : '已拒绝';
     };
 
     const statusClass = (status) => {
-      if (status === 'pending') {
+      if (status === '审核中') {
         return 'pending-status';
-      } else if (status === 'approved') {
+      } else if (status === '已通过') {
         return 'approved-status';
       } else {
         return 'rejected-status';

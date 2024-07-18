@@ -56,8 +56,8 @@ public class ClubService {
     }
 
     public List<Club> getClubsByUserId(Long userId) {
-        List<Application> applications = applicationRepository.findByUserIdAndStatus(userId, "approved");
-        List<Application> passedApplications = applicationRepository.findByUserIdAndStatus(userId, "通过");
+        List<Application> applications = applicationRepository.findByUserIdAndStatus(userId, "已通过");
+        List<Application> passedApplications = applicationRepository.findByUserIdAndStatus(userId, "approved");
         applications.addAll(passedApplications);
 
         List<String> clubNames = applications.stream()

@@ -12,15 +12,15 @@
           </div>
           <div v-else>
             <span :style="{ color: scope.row.status === 'approved' ? 'green' : 'red' }">
-              {{ scope.row.status === 'approved' ? '已同意' : '已拒绝' }}
+              {{ scope.row.status === 'approved' ? '已通过' : '已拒绝' }}
             </span>
           </div>
         </template>
       </el-table-column>
       <el-table-column prop="status" label="状态" width="180">
         <template #default="scope">
-          <span :style="{ color: scope.row.status === 'approved' ? 'green' : scope.row.status === 'rejected' ? 'red' : 'yellow' }">
-            {{ scope.row.status === 'pending' ? '审核中' : scope.row.status === 'approved' ? '已同意' : '已拒绝' }}
+          <span :style="{ color: getStatusColor(scope.row.status) }">
+            {{ formatStatus(scope.row.status) }}
           </span>
         </template>
       </el-table-column>
@@ -180,9 +180,31 @@ const sortedClubs = computed(() => {
     return 0;
   });
 });
+
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'approved':
+      return 'green';
+    case 'rejected':
+      return 'red';
+    case 'pending':
+    default:
+      return 'orange';
+  }
+};
+
+const formatStatus = (status) => {
+  switch (status) {
+    case 'approved':
+      return '已通过';
+    case 'rejected':
+      return '已拒绝';
+    case 'pending':
+    default:
+      return '审核中';
+  }
+};
 </script>
-
-
 
 <style scoped>
 .club-approval {
