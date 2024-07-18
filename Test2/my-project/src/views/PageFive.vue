@@ -78,7 +78,7 @@ export default {
 
     const fetchClubApplications = async () => {
       try {
-        const response = await axios.get('http://localhost:8088/api/club-applications/user?userId=${userId}');
+        const response = await axios.get(`http://localhost:8088/api/club-applications/user?userId=${userId}`);
         const sortedApplications = response.data.sort((a, b) => {
           if (a.status === 'approved' && b.status !== 'approved') {
             return -1;
@@ -214,7 +214,7 @@ export default {
 }
 
 .pending-status {
-  color: yellow;
+  color: orange;
 }
 
 .approved-status {

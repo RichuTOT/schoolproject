@@ -31,7 +31,7 @@ public class ApplicationService {
     @Transactional
     public Application saveApplication(Application application) {
         application.setDate(LocalDateTime.now());
-        application.setStatus("pending"); // 设置默认状态为pending
+        application.setStatus("审核中"); // 设置默认状态为pending
         return applicationRepository.save(application);
     }
 

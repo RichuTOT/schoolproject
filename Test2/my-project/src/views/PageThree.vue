@@ -21,7 +21,7 @@
           <el-form-item label="添加图片">
             <el-upload
               ref="uploadRef"
-              action="http://localhost:8088/api/activities/upload"
+              action="http://localhost:8088/api/uploads"
               list-type="picture-card"
               :on-preview="handlePictureCardPreview"
               :on-remove="handleRemove"
@@ -168,7 +168,7 @@ export default {
 
     const getStatusColor = (status) => {
       switch (status) {
-        case '已同意':
+        case '已通过':
           return 'green';
         case '已拒绝':
           return 'red';
@@ -196,9 +196,9 @@ export default {
       userId,
     });
 
-    const uploadHeaders = () => ({
+    const uploadHeaders = {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
-    });
+    };
 
     return {
       activityForm,

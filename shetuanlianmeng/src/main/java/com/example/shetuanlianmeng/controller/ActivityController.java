@@ -141,7 +141,7 @@ public class ActivityController {
     @PostMapping("/approve/{id}")
     public ResponseEntity<?> approveActivity(@PathVariable Long id) {
         Activity activity = activityRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("活动未找到"));
-        activity.setStatus("已同意");
+        activity.setStatus("已通过");
         activityRepository.save(activity);
         return ResponseEntity.ok().build();
     }
@@ -156,7 +156,7 @@ public class ActivityController {
 
     @GetMapping("/approved")
     public ResponseEntity<List<Activity>> getApprovedActivities() {
-        List<Activity> activities = activityRepository.findByStatus("已同意");
+        List<Activity> activities = activityRepository.findByStatus("已通过");
         for (Activity activity : activities) {
             List<Image> images = imageRepository.findByActivity(activity);
             activity.setImages(images.stream().map(Image::getImageUrl).collect(Collectors.toList()));

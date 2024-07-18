@@ -58,7 +58,7 @@ public class ClubApplicationController {
     public ResponseEntity<?> approveClubApplication(@PathVariable Long id) {
         try {
             clubApplicationService.approveClubApplication(id);
-            return ResponseEntity.ok("Approved");
+            return ResponseEntity.ok("已通过");
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -68,7 +68,7 @@ public class ClubApplicationController {
     public ResponseEntity<?> rejectClubApplication(@PathVariable Long id) {
         try {
             clubApplicationService.rejectClubApplication(id);
-            return ResponseEntity.ok("Rejected");
+            return ResponseEntity.ok("已拒绝");
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
