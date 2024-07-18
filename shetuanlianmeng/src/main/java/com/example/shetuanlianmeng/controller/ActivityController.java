@@ -1,6 +1,6 @@
 package com.example.shetuanlianmeng.controller;
 
-import com.example.shetuanlianmeng.config.FileStorageProperties;
+//import com.example.shetuanlianmeng.config.FileStorageProperties;
 import com.example.shetuanlianmeng.entity.Activity;
 import com.example.shetuanlianmeng.entity.Image;
 import com.example.shetuanlianmeng.repository.ActivityRepository;
@@ -30,9 +30,9 @@ import org.slf4j.LoggerFactory;
 public class ActivityController {
 
     private static final Logger logger = LoggerFactory.getLogger(ActivityController.class);
-    private final Path fileStorageLocation;
+    //private final Path fileStorageLocation;
 
-    public ActivityController(FileStorageProperties fileStorageProperties) {
+    /*public ActivityController(FileStorageProperties fileStorageProperties) {
         logger.info("Initializing ActivityController...");
         logger.info("Upload directory from FileStorageProperties: {}", fileStorageProperties.getUploadDir());
 
@@ -51,7 +51,7 @@ public class ActivityController {
             logger.error("Could not create the directory where the uploaded files will be stored.", ex);
             throw new RuntimeException("Could not create the directory where the uploaded files will be stored.", ex);
         }
-    }
+    }*/
 
     @Autowired
     private ActivityRepository activityRepository;
