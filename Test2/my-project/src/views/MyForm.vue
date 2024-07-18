@@ -42,11 +42,11 @@ import { ElButton, ElDialog, ElForm, ElFormItem, ElInput, ElAlert, ElRadio, ElRa
 const props = defineProps({
   title: {
     type: String,
-    default: '标题',
+    default: '编辑资料',
   },
   text: {
     type: String,
-    default: '文本',
+    default: '请输入以下资料',
   },
   options: {
     type: Object,

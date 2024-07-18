@@ -21,19 +21,17 @@
         <template v-slot="scope">
           <el-button 
             type="success" 
-            icon="el-icon-check" 
             size="mini" 
             @click="confirmApprove(scope.row.id, scope.$index)"
             :disabled="scope.row.status !== 'pending'"
             style="margin-right: 10px;">
-          </el-button>
+          同意</el-button>
           <el-button 
-            type="danger" 
-            icon="el-icon-close" 
+            type="danger"  
             size="mini" 
             @click="confirmReject(scope.row.id, scope.$index)"
             :disabled="scope.row.status !== 'pending'">
-          </el-button>
+          拒绝</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -45,6 +43,7 @@
 import axios from 'axios';
 import { ref, onMounted, computed } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
+
 
 export default {
   name: 'ActivityApproval',
