@@ -34,10 +34,11 @@ export default {
   setup() {
     const activities = ref([]);
     const carouselItems = ref([
-      { src: 'image1.jpg' },
-      { src: 'image2.jpg' },
-      { src: 'image3.jpg' }
-    ]);
+  { src: '/src/assets/fengjing1.jpg' },
+  { src: '/src/assets/fengjing2.jpg' },
+  { src: '/src/assets/fengjing3.jpg' }
+]);
+
 
     const fetchActivities = async () => {
       try {
@@ -77,9 +78,10 @@ export default {
 }
 
 .carousel-image {
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
+  width: 100%; /* 固定宽度 */
+  height: 400px; /* 固定高度 */
+  object-fit: cover; /* 保持比例并覆盖整个区域 */
+  object-position: center; /* 将图片居中 */
 }
 
 .activities {
