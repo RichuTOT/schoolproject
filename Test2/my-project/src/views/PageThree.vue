@@ -145,7 +145,7 @@ export default {
         const activityData = {
           ...activityForm.value,
           publishTime: new Date().toISOString(),
-          status: 'pending',
+          status: '审核中',
           userId: userId
         };
         try {
@@ -168,11 +168,11 @@ export default {
 
     const getStatusColor = (status) => {
       switch (status) {
-        case 'approved':
+        case '已同意':
           return 'green';
-        case 'rejected':
+        case '已拒绝':
           return 'red';
-        case 'pending':
+        case '审核中':
         default:
           return 'orange';
       }

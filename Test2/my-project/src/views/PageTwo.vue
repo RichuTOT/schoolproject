@@ -3,10 +3,10 @@
     <el-aside width="200px" style="background-color: #f2f2f2;">
       <el-menu default-active="all" class="el-menu-vertical-demo" @select="handleCategorySelect">
         <el-menu-item index="all">全部</el-menu-item>
-        <el-menu-item index="学术类">学术类</el-menu-item>
-        <el-menu-item index="文体类">文体类</el-menu-item>
-        <el-menu-item index="志愿服务类">志愿服务类</el-menu-item>
-        <el-menu-item index="休闲类">休闲类</el-menu-item>
+        <el-menu-item index="文学类">文学类</el-menu-item>
+        <el-menu-item index="体育类">体育</el-menu-item>
+        <el-menu-item index="哲学类">哲学类</el-menu-item>
+        <el-menu-item index="其他">其他</el-menu-item>
       </el-menu>
     </el-aside>
     <el-container>

@@ -1,16 +1,16 @@
 <template>
   <div class="activity-release">
     <h2>创建社团</h2>
-    <el-form :model="form" :rules="rules" ref="form" label-width="100px">
+    <el-form :model="form" label-width="100px">
       <el-row>
         <el-col :span="12">
-          <el-form-item label="社团名称" prop="clubName">
+          <el-form-item label="社团名称">
             <el-input v-model="form.clubName" placeholder="请输入名称"></el-input>
           </el-form-item>
-          <el-form-item label="详细介绍" prop="description">
+          <el-form-item label="详细介绍">
             <el-input type="textarea" v-model="form.description" placeholder="请输入关于社团的详细介绍"></el-input>
           </el-form-item>
-          <el-form-item label="社团分类" prop="category">
+          <el-form-item label="社团分类">
             <el-select v-model="form.category" placeholder="请选择">
               <el-option label="文学类" value="文学类"></el-option>
               <el-option label="体育类" value="体育类"></el-option>
@@ -18,7 +18,7 @@
               <el-option label="其他" value="其他"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="发布人" prop="publisher">
+          <el-form-item label="发布人">
             <el-input v-model="form.publisher" :disabled="true"></el-input>
           </el-form-item>
         </el-col>
@@ -63,13 +63,6 @@ export default {
       images: []
     });
 
-    const rules = ref({
-      clubName: [{ required: true, message: '请输入社团名称', trigger: 'blur' }],
-      description: [{ required: true, message: '请输入详细介绍', trigger: 'blur' }],
-      category: [{ required: true, message: '请选择社团分类', trigger: 'change' }],
-      publisher: [{ required: true, message: '发布人不能为空', trigger: 'blur' }]
-    });
-
     const dialogImageUrl = ref('');
     const dialogVisible = ref(false);
     const clubApplications = ref([]);
@@ -85,7 +78,7 @@ export default {
 
     const fetchClubApplications = async () => {
       try {
-        const response = await axios.get(`http://localhost:8088/api/club-applications/user?userId=${userId}`);
+        const response = await axios.get('http://localhost:8088/api/club-applications/user?userId=${userId}');
         const sortedApplications = response.data.sort((a, b) => {
           if (a.status === 'approved' && b.status !== 'approved') {
             return -1;
@@ -120,55 +113,44 @@ export default {
     };
 
     const onApply = async () => {
-      const formRef = ref('form');
-      formRef.value.validate(async (valid) => {
-        if (!valid) {
-          ElMessage({
-            message: '请填写完整表单后再提交',
-            type: 'error'
-          });
-          return;
-        }
+      if (!userId) {
+        console.error('用户未登录');
+        return;
+      }
 
-        if (!userId) {
-          console.error('用户未登录');
-          return;
-        }
+      const existingApplications = clubApplications.value.filter(app => app.status === 'pending' || app.status === 'approved');
+      if (existingApplications.length > 0) {
+        ElMessage({
+          message: '已经申请过了，正在审核或已通过，耐心等待~',
+          type: 'error'
+        });
+        return;
+      }
 
-        const existingApplications = clubApplications.value.filter(app => app.status === 'pending' || app.status === 'approved');
-        if (existingApplications.length > 0) {
-          ElMessage({
-            message: '已经申请过了，正在审核或已通过，耐心等待~',
-            type: 'error'
-          });
-          return;
-        }
-
-        const clubApplicationData = {
-          ...form.value,
-          userId: userId,
-          applyTime: new Date().toISOString(),
-          status: 'pending'
+      const clubApplicationData = {
+        ...form.value,
+        userId: userId,
+        applyTime: new Date().toISOString(),
+        status: 'pending'
+      };
+      try {
+        const response = await axios.post('http://localhost:8088/api/club-applications', clubApplicationData, { withCredentials: true });
+        console.log('申请成功', response.data);
+        form.value = {
+          clubName: '',
+          description: '',
+          category: '',
+          publisher: '',
+          images: []
         };
-        try {
-          const response = await axios.post('http://localhost:8088/api/club-applications', clubApplicationData, { withCredentials: true });
-          console.log('申请成功', response.data);
-          form.value = {
-            clubName: '',
-            description: '',
-            category: '',
-            publisher: '',
-            images: []
-          };
-          await fetchClubApplications(); // Refresh the club applications list
-        } catch (error) {
-          ElMessage({
-            message: '申请失败，请重试。',
-            type: 'error'
-          });
-          console.error('申请失败', error);
-        }
-      });
+        await fetchClubApplications(); // Refresh the club applications list
+      } catch (error) {
+        ElMessage({
+          message: '申请失败，请重试。',
+          type: 'error'
+        });
+        console.error('申请失败', error);
+      }
     };
 
     const formatDate = (row, column, cellValue) => {
@@ -195,7 +177,6 @@ export default {
 
     return {
       form,
-      rules,
       dialogImageUrl,
       dialogVisible,
       clubApplications,

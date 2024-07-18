@@ -97,7 +97,7 @@ public class ActivityController {
 
     @PostMapping
     public ResponseEntity<Activity> createActivity(@RequestBody Activity activity) {
-        activity.setStatus("pending"); // 设置活动状态为待审核
+        activity.setStatus("审核中"); // 设置活动状态为待审核
         Activity savedActivity = activityRepository.save(activity);
         for (String imageUrl : activity.getImages()) {
             Image image = new Image();
@@ -120,7 +120,7 @@ public class ActivityController {
 
     @GetMapping("/pending")
     public ResponseEntity<List<Activity>> getPendingActivities() {
-        List<Activity> activities = activityRepository.findByStatus("pending");
+        List<Activity> activities = activityRepository.findByStatus("审核中");
         for (Activity activity : activities) {
             List<Image> images = imageRepository.findByActivity(activity);
             activity.setImages(images.stream().map(Image::getImageUrl).collect(Collectors.toList()));
@@ -141,14 +141,22 @@ public class ActivityController {
     @PostMapping("/approve/{id}")
     public ResponseEntity<?> approveActivity(@PathVariable Long id) {
         Activity activity = activityRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("活动未找到"));
-        activity.setStatus("approved");
+        activity.setStatus("已同意");
+        activityRepository.save(activity);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reject/{id}")
+    public ResponseEntity<?> rejectActivity(@PathVariable Long id) {
+        Activity activity = activityRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("活动未找到"));
+        activity.setStatus("已拒绝");
         activityRepository.save(activity);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/approved")
     public ResponseEntity<List<Activity>> getApprovedActivities() {
-        List<Activity> activities = activityRepository.findByStatus("approved");
+        List<Activity> activities = activityRepository.findByStatus("已同意");
         for (Activity activity : activities) {
             List<Image> images = imageRepository.findByActivity(activity);
             activity.setImages(images.stream().map(Image::getImageUrl).collect(Collectors.toList()));
