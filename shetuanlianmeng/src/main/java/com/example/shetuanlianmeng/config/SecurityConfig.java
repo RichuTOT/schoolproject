@@ -62,7 +62,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
         .csrf(csrf -> csrf.disable())
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/api/users/register", "/api/users/**", "/api/clubs/**", "/api/activities/**", "/api/applications/**", "/api/favorites/**", "/api/uploads/**", "/api/club-applications/**", "/api/user-info", "/api/statistics","/api/messages/**").permitAll()
+            .requestMatchers("/api/users/register", "/api/users/**", "/api/clubs/**", "/api/activities/**", "/api/applications/**", "/api/favorites/**", "/api/uploads/**", "/api/club-applications/**", "/api/user-info", "/api/statistics","/api/messages/**", "/uploads/**").permitAll()
             .requestMatchers("/admin/**").hasRole("ADMIN")
             .requestMatchers("/dashboard/page-three", "/dashboard/members").hasRole("CLUB_LEADER")
             .anyRequest().authenticated()
@@ -81,7 +81,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
 @Bean
 public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+    configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://10.255.17.172:5173"));
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
     configuration.setExposedHeaders(Arrays.asList("X-Total-Count"));

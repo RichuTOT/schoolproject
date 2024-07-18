@@ -20,6 +20,7 @@
         <el-col :span="12">
           <el-form-item label="添加图片">
             <el-upload
+              ref="uploadRef"
               action="http://localhost:8088/api/activities/upload"
               list-type="picture-card"
               :on-preview="handlePictureCardPreview"
@@ -81,6 +82,7 @@ export default {
     const pendingActivities = ref([]);
     const requestUrl = ref('');
     const requestError = ref('');
+    const uploadRef = ref(null);
 
     const userId = localStorage.getItem('userId');
 
@@ -143,6 +145,7 @@ export default {
           images: []
         };
         await fetchPendingActivities();
+        uploadRef.value.clearFiles(); // 清空上传文件列表
       } catch (error) {
         console.error('Error publishing activity:', error);
       }
@@ -198,6 +201,7 @@ export default {
       formatDate,
       uploadData,
       uploadHeaders,
+      uploadRef, // 引用上传组件
     };
   }
 };
