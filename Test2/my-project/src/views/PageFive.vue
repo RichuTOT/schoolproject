@@ -159,7 +159,7 @@ export default {
     };
 
     const formatStatus = (status) => {
-      if (status === 'pending') {
+      if (status === '审核中') {
         return '审核中';
       }
       return status === '已通过' ? '已通过' : '已拒绝';

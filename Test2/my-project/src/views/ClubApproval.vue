@@ -6,13 +6,13 @@
       <el-table-column prop="description" label="详细信息" width="300"></el-table-column>
       <el-table-column label="操作" width="180">
         <template #default="scope">
-          <div v-if="scope.row.status === 'pending'">
+          <div v-if="scope.row.status === '审核中'">
             <el-button type="primary" @click="confirmApproval(scope.row)">同意</el-button>
             <el-button type="danger" @click="confirmRejection(scope.row)">拒绝</el-button>
           </div>
           <div v-else>
-            <span :style="{ color: scope.row.status === 'approved' ? 'green' : 'red' }">
-              {{ scope.row.status === 'approved' ? '已通过' : '已拒绝' }}
+            <span :style="{ color: scope.row.status === '已通过' ? 'green' : 'red' }">
+              {{ scope.row.status === '已通过' ? '已通过' : '已拒绝' }}
             </span>
           </div>
         </template>
@@ -77,7 +77,7 @@ const approveClub = async (row) => {
       },
     });
     if (response.ok) {
-      row.status = 'approved';
+      row.status = '已通过';
       ElMessage({
         type: 'success',
         message: '社团已同意',
@@ -123,7 +123,7 @@ const rejectClub = async (row) => {
       },
     });
     if (response.ok) {
-      row.status = 'rejected';
+      row.status = '已拒绝';
       ElMessage({
         type: 'success',
         message: '社团已拒绝',
@@ -175,19 +175,19 @@ onMounted(() => {
 
 const sortedClubs = computed(() => {
   return clubs.value.slice().sort((a, b) => {
-    if (a.status === 'pending' && b.status !== 'pending') return -1;
-    if (a.status !== 'pending' && b.status === 'pending') return 1;
+    if (a.status === '审核中' && b.status !== '审核中') return -1;
+    if (a.status !== '审核中' && b.status === '审核中') return 1;
     return 0;
   });
 });
 
 const getStatusColor = (status) => {
   switch (status) {
-    case 'approved':
+    case '已通过':
       return 'green';
-    case 'rejected':
+    case '已拒绝':
       return 'red';
-    case 'pending':
+    case '审核中':
     default:
       return 'orange';
   }
@@ -195,11 +195,11 @@ const getStatusColor = (status) => {
 
 const formatStatus = (status) => {
   switch (status) {
-    case 'approved':
+    case '已通过':
       return '已通过';
-    case 'rejected':
+    case '已拒绝':
       return '已拒绝';
-    case 'pending':
+    case '审核中':
     default:
       return '审核中';
   }
