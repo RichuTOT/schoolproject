@@ -72,7 +72,7 @@ public class ClubApplicationService {
 
     public void approveClubApplication(Long id) {
         ClubApplication application = clubApplicationRepository.findById(id).orElseThrow(() -> new IllegalStateException("Application not found"));
-        application.setStatus("approved");
+        application.setStatus("已通过");
         clubApplicationRepository.save(application);
 
         // 保存到Club数据库表中
@@ -93,14 +93,14 @@ public class ClubApplicationService {
         newApplication.setCategory(application.getCategory());
         newApplication.setUserId(Long.valueOf(application.getUserId()));
         newApplication.setDate(LocalDateTime.now());
-        newApplication.setStatus("approved");
+        newApplication.setStatus("已通过");
         newApplication.setRole("clubleader");
         applicationRepository.save(newApplication);
     }
 
     public void rejectClubApplication(Long id) {
         ClubApplication application = clubApplicationRepository.findById(id).orElseThrow(() -> new IllegalStateException("Application not found"));
-        application.setStatus("rejected");
+        application.setStatus("已拒绝");
         clubApplicationRepository.save(application);
     }
 }
